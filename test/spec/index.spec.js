@@ -9,11 +9,16 @@ var del = require('del');
 var Promise = require('promise');
 var readDirFiles = require('read-dir-files');
 var through = require('through2');
+var rewire = require('rewire');
 
-var copy = require('../../index');
+var copy = rewire('../../index');
 
 var SOURCE_PATH = path.resolve(__dirname, '../fixtures/source');
 var DESTINATION_PATH = path.resolve(__dirname, '../fixtures/destination');
+
+var COPY_EVENTS = Object.keys(copy.events).map(function(key) {
+	return copy.events[key];
+});
 
 chai.use(chaiAsPromised);
 
@@ -97,6 +102,56 @@ describe('copy()', function() {
 			actual = file.stats && file.stats.isDirectory;
 			expect(actual).to.be.a(expected);
 		});
+	}
+
+	function listenTo(emitter, eventNames) {
+		var events = [];
+		eventNames.forEach(function(eventName) {
+			emitter.on(eventName, createListener(eventName));
+		});
+		return events;
+
+
+		function createListener(eventName) {
+			return function(args) {
+				events.push({
+					name: eventName,
+					args: Array.prototype.slice.call(arguments)
+				});
+			};
+		}
+	}
+
+	function mockMkdirp(subject) {
+		return subject.__set__('mkdirp', mkdirp);
+
+		function mkdirp(path, mode, callback) {
+			if ((arguments.length === 2) && (typeof mode === 'function')) {
+				callback = mode;
+				mode = undefined;
+			}
+			setTimeout(function() {
+				callback(new Error('Test error'));
+			});
+		}
+	}
+
+	function mockSymlink(subject) {
+		var originalSymlink = subject.__get__('fs').symlink;
+		subject.__get__('fs').symlink = symlink;
+		return function() {
+			subject.__get__('fs').symlink = originalSymlink;
+		};
+
+		function symlink(srcPath, dstPath, type, callback) {
+			if ((arguments.length === 3) && (typeof type === 'function')) {
+				callback = type;
+				type = undefined;
+			}
+			setTimeout(function() {
+				callback(new Error('Test error'));
+			});
+		}
 	}
 
 	describe('basic operation', function() {
@@ -1003,6 +1058,401 @@ describe('copy()', function() {
 					done();
 				}
 			);
+		});
+	});
+
+	describe('events', function() {
+		it('should export event names and values', function() {
+			var actual, expected;
+			actual = copy.events;
+			expected = {
+				ERROR: 'error',
+				COMPLETE: 'complete',
+				CREATE_DIRECTORY_START: 'createDirectoryStart',
+				CREATE_DIRECTORY_ERROR: 'createDirectoryError',
+				CREATE_DIRECTORY_COMPLETE: 'createDirectoryComplete',
+				CREATE_SYMLINK_START: 'createSymlinkStart',
+				CREATE_SYMLINK_ERROR: 'createSymlinkError',
+				CREATE_SYMLINK_COMPLETE: 'createSymlinkComplete',
+				COPY_FILE_START: 'copyFileStart',
+				COPY_FILE_ERROR: 'copyFileError',
+				COPY_FILE_COMPLETE: 'copyFileComplete'
+			};
+			expect(actual).to.eql(expected);
+		});
+
+		it('should emit file copy events', function() {
+			var emitter = copy(
+				getSourcePath('file'),
+				getDestinationPath('file')
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.then(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['copyFileStart', 'copyFileComplete', 'complete'];
+				expect(actual).to.eql(expected);
+
+				var completeEvent = events.filter(function(event) {
+					return event.name === 'complete';
+				})[0];
+				var eventArgs = completeEvent.args;
+
+				actual = eventArgs.length;
+				expected = 1;
+				expect(actual).to.equal(expected);
+
+				var results = eventArgs[0];
+				checkResults(results, ['file']);
+			});
+		});
+
+		it('should emit error events', function() {
+			fs.writeFileSync(getDestinationPath('file'), '');
+
+			var emitter = copy(
+				getSourcePath('file'),
+				getDestinationPath('file')
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.catch(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['error'];
+				expect(actual).to.eql(expected);
+
+				var errorEvent = events.filter(function(event) {
+					return event.name === 'error';
+				})[0];
+				var eventArgs = errorEvent.args;
+
+				actual = eventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var error = eventArgs[0];
+				var copyOperation = eventArgs[1];
+
+				actual = function() { throw error; };
+				expected = 'EEXIST';
+				expect(actual).to.throw(expected);
+
+				actual = copyOperation.src;
+				expected = getSourcePath('file');
+				expect(actual).to.equal(expected);
+
+				actual = copyOperation.dest;
+				expected = getDestinationPath('file');
+				expect(actual).to.equal(expected);
+			});
+		});
+
+		it('should emit file copy error events', function() {
+			var emitter = copy(
+				getSourcePath('file'),
+				getDestinationPath('file'),
+				{
+					transform: function(src, dest, stats) {
+						return through(function(chunk, enc, done) {
+							done(new Error('Stream error'));
+						});
+					}
+				}
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.catch(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['copyFileStart', 'copyFileError', 'error'];
+				expect(actual).to.eql(expected);
+
+
+				var errorEvent = events.filter(function(event) {
+					return event.name === 'error';
+				})[0];
+				var eventArgs = errorEvent.args;
+
+				actual = eventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var error = eventArgs[0];
+				var copyOperation = eventArgs[1];
+
+				actual = function() { throw error; };
+				expected = 'Stream error';
+				expect(actual).to.throw(expected);
+
+				actual = copyOperation.src;
+				expected = getSourcePath('file');
+				expect(actual).to.equal(expected);
+
+				actual = copyOperation.dest;
+				expected = getDestinationPath('file');
+				expect(actual).to.equal(expected);
+
+
+				var fileErrorEvent = events.filter(function(event) {
+					return event.name === 'copyFileError';
+				})[0];
+				var fileErrorEventArgs = fileErrorEvent.args;
+
+				actual = fileErrorEventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var fileError = fileErrorEventArgs[0];
+				var fileCopyOperation = fileErrorEventArgs[1];
+
+				actual = function() { throw fileError; };
+				expected = 'Stream error';
+				expect(actual).to.throw(expected);
+
+				actual = fileCopyOperation.src;
+				expected = getSourcePath('file');
+				expect(actual).to.equal(expected);
+
+				actual = fileCopyOperation.dest;
+				expected = getDestinationPath('file');
+				expect(actual).to.equal(expected);
+
+				actual = fileCopyOperation.stats && fileCopyOperation.stats.isDirectory;
+				expected = 'function';
+				expect(actual).to.be.a(expected);
+			});
+		});
+
+		it('should emit directory copy events', function() {
+			var emitter = copy(
+				getSourcePath('empty'),
+				getDestinationPath('empty')
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.then(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['createDirectoryStart', 'createDirectoryComplete', 'complete'];
+				expect(actual).to.eql(expected);
+
+				var completeEvent = events.filter(function(event) {
+					return event.name === 'complete';
+				})[0];
+				var eventArgs = completeEvent.args;
+
+				actual = eventArgs.length;
+				expected = 1;
+				expect(actual).to.equal(expected);
+
+				var results = eventArgs[0];
+				checkResults(results, ['empty']);
+			});
+		});
+
+		it('should emit directory copy error events', function() {
+			var unmockMkdirp = mockMkdirp(copy);
+
+			var emitter = copy(
+				getSourcePath('empty'),
+				getDestinationPath('empty')
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.catch(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['createDirectoryStart', 'createDirectoryError', 'error'];
+				expect(actual).to.eql(expected);
+
+
+				var errorEvent = events.filter(function(event) {
+					return event.name === 'error';
+				})[0];
+				var eventArgs = errorEvent.args;
+
+				actual = eventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var error = eventArgs[0];
+				var copyOperation = eventArgs[1];
+
+				actual = function() { throw error; };
+				expected = 'Test error';
+				expect(actual).to.throw(expected);
+
+				actual = copyOperation.src;
+				expected = getSourcePath('empty');
+				expect(actual).to.equal(expected);
+
+				actual = copyOperation.dest;
+				expected = getDestinationPath('empty');
+				expect(actual).to.equal(expected);
+
+
+				var directoryErrorEvent = events.filter(function(event) {
+					return event.name === 'createDirectoryError';
+				})[0];
+				var directoryErrorEventArgs = directoryErrorEvent.args;
+
+				actual = directoryErrorEventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var directoryError = directoryErrorEventArgs[0];
+				var directoryCopyOperation = directoryErrorEventArgs[1];
+
+				actual = function() { throw directoryError; };
+				expected = 'Test error';
+				expect(actual).to.throw(expected);
+
+				actual = directoryCopyOperation.src;
+				expected = getSourcePath('empty');
+				expect(actual).to.equal(expected);
+
+				actual = directoryCopyOperation.dest;
+				expected = getDestinationPath('empty');
+				expect(actual).to.equal(expected);
+
+				actual = directoryCopyOperation.stats && directoryCopyOperation.stats.isDirectory;
+				expected = 'function';
+				expect(actual).to.be.a(expected);
+			})
+			.finally(function() {
+				unmockMkdirp();
+			});
+		});
+
+		it('should emit symlink copy error events', function() {
+			var umockSymlink = mockSymlink(copy);
+
+			var emitter = copy(
+				getSourcePath('symlink'),
+				getDestinationPath('symlink')
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.catch(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['createSymlinkStart', 'createSymlinkError', 'error'];
+				expect(actual).to.eql(expected);
+
+
+				var errorEvent = events.filter(function(event) {
+					return event.name === 'error';
+				})[0];
+				var eventArgs = errorEvent.args;
+
+				actual = eventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var error = eventArgs[0];
+				var copyOperation = eventArgs[1];
+
+				actual = function() { throw error; };
+				expected = 'Test error';
+				expect(actual).to.throw(expected);
+
+				actual = copyOperation.src;
+				expected = getSourcePath('symlink');
+				expect(actual).to.equal(expected);
+
+				actual = copyOperation.dest;
+				expected = getDestinationPath('symlink');
+				expect(actual).to.equal(expected);
+
+
+				var symlinkErrorEvent = events.filter(function(event) {
+					return event.name === 'createSymlinkError';
+				})[0];
+				var symlinkErrorEventArgs = symlinkErrorEvent.args;
+
+				actual = symlinkErrorEventArgs.length;
+				expected = 2;
+				expect(actual).to.equal(expected);
+
+				var symlinkError = symlinkErrorEventArgs[0];
+				var symlinkCopyOperation = symlinkErrorEventArgs[1];
+
+				actual = function() { throw symlinkError; };
+				expected = 'Test error';
+				expect(actual).to.throw(expected);
+
+				actual = symlinkCopyOperation.src;
+				expected = getSourcePath('symlink');
+				expect(actual).to.equal(expected);
+
+				actual = symlinkCopyOperation.dest;
+				expected = getDestinationPath('symlink');
+				expect(actual).to.equal(expected);
+
+				actual = symlinkCopyOperation.stats && symlinkCopyOperation.stats.isDirectory;
+				expected = 'function';
+				expect(actual).to.be.a(expected);
+			})
+			.finally(function() {
+				umockSymlink();
+			});
+		});
+
+		it('should emit symlink copy events', function() {
+			var emitter = copy(
+				getSourcePath('symlink'),
+				getDestinationPath('symlink')
+			);
+			var events = listenTo(emitter, COPY_EVENTS);
+			return emitter.then(function() {
+				var actual, expected;
+
+				var eventNames = events.map(function(event) {
+					return event.name;
+				});
+
+				actual = eventNames;
+				expected = ['createSymlinkStart', 'createSymlinkComplete', 'complete'];
+				expect(actual).to.eql(expected);
+
+				var completeEvent = events.filter(function(event) {
+					return event.name === 'complete';
+				})[0];
+				var eventArgs = completeEvent.args;
+
+				actual = eventArgs.length;
+				expected = 1;
+				expect(actual).to.equal(expected);
+
+				var results = eventArgs[0];
+				checkResults(results, ['symlink']);
+			});
 		});
 	});
 });

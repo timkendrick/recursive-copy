@@ -2,12 +2,28 @@
 
 var fs = require('graceful-fs');
 var path = require('path');
+var EventEmitter = require('events').EventEmitter;
 var Promise = require('promise');
 var extend = require('extend');
 var mkdirp = require('mkdirp');
 var junk = require('junk');
 var errno = require('errno');
 var minimatch = require('minimatch');
+
+var CopyError = errno.custom.createError('CopyError');
+
+var EVENT_ERROR = 'error';
+var EVENT_COMPLETE = 'complete';
+var EVENT_CREATE_DIRECTORY_START = 'createDirectoryStart';
+var EVENT_CREATE_DIRECTORY_ERROR = 'createDirectoryError';
+var EVENT_CREATE_DIRECTORY_COMPLETE = 'createDirectoryComplete';
+var EVENT_CREATE_SYMLINK_START = 'createSymlinkStart';
+var EVENT_CREATE_SYMLINK_ERROR = 'createSymlinkError';
+var EVENT_CREATE_SYMLINK_COMPLETE = 'createSymlinkComplete';
+var EVENT_COPY_FILE_START = 'copyFileStart';
+var EVENT_COPY_FILE_ERROR = 'copyFileError';
+var EVENT_COPY_FILE_COMPLETE = 'copyFileComplete';
+
 
 module.exports = function(src, dest, options, callback) {
 	if ((arguments.length === 3) && (typeof options === 'function')) {
@@ -31,14 +47,35 @@ module.exports = function(src, dest, options, callback) {
 
 	var srcRoot = src;
 	var destRoot = dest;
-	return copy(src, dest, srcRoot, destRoot, options)
+
+	var emitter = new EventEmitter();
+
+	var promise = copy(src, dest, srcRoot, destRoot, options)
 		.then(function(result) {
 			return flattenResultsTree(result);
 		})
+		.catch(function(error) {
+			if (error instanceof CopyError) {
+				emitEvent(EVENT_ERROR, error.error, error.data);
+				throw error.error;
+			} else {
+				throw error;
+			}
+		})
+		.then(function(results) {
+			emitEvent(EVENT_COMPLETE, results);
+			return results;
+		})
 		.finally(function() {
 			hasFinished = true;
-		})
-		.nodeify(callback);
+		});
+
+	if (typeof callback === 'function') {
+		promise.nodeify(callback);
+		return emitter;
+	} else {
+		return mixinEmitterMethods(promise, emitter);
+	}
 
 
 	function getCombinedFilter(options) {
@@ -113,6 +150,20 @@ module.exports = function(src, dest, options, callback) {
 		};
 	}
 
+	function mixinEmitterMethods(object, emitter) {
+		Object.keys(EventEmitter.prototype).filter(function(memberName) {
+			return typeof emitter[memberName] === 'function';
+		}).forEach(function(methodName) {
+			object[methodName] = emitter[methodName].bind(emitter);
+		});
+		return object;
+	}
+
+	function emitEvent(event, args) {
+		if (hasFinished) { return; }
+		emitter.emit.apply(emitter, arguments);
+	}
+
 	function flattenResultsTree(result) {
 		return (result.files || []).reduce(function(results, result) {
 			return results.concat(flattenResultsTree(result));
@@ -129,6 +180,15 @@ module.exports = function(src, dest, options, callback) {
 				} else {
 					return copyFile(srcPath, destPath, srcRoot, destRoot, stats, options);
 				}
+			})
+			.catch(function(error) {
+				var copyError = new CopyError(error.message);
+				copyError.error = error;
+				copyError.data = {
+					src: srcPath,
+					dest: destPath
+				};
+				throw copyError;
 			});
 
 
@@ -165,55 +225,111 @@ module.exports = function(src, dest, options, callback) {
 
 		function copyFile(srcPath, destPath, srcRoot, destRoot, stats, options) {
 			return new Promise(function(resolve, reject) {
+				emitEvent(EVENT_COPY_FILE_START, {
+					src: srcPath,
+					dest: destPath,
+					stats: stats
+				});
 				var read = fs.createReadStream(srcPath);
-				read.on('error', reject);
+				read.on('error', handleCopyFailed);
 
 				var write = fs.createWriteStream(destPath, { flags: 'w' });
-				write.on('error', reject);
+				write.on('error', handleCopyFailed);
 				write.on('finish', function() {
 					chmod(destPath, stats.mode)
 						.then(function() {
+							emitEvent(EVENT_COPY_FILE_COMPLETE, {
+								src: srcPath,
+								dest: destPath,
+								stats: stats
+							});
 							return resolve({
 								src: srcPath,
 								dest: destPath,
 								stats: stats
 							});
+						})
+						.catch(function(error) {
+							return handleCopyFailed(error);
 						});
 				});
 
 				var transformStream = null;
 				if (options.transform) {
 					transformStream = options.transform(srcPath, destPath, stats);
-					transformStream.on('error', reject);
+					transformStream.on('error', handleCopyFailed);
 					read.pipe(transformStream).pipe(write);
 				} else {
 					read.pipe(write);
+				}
+
+
+				function handleCopyFailed(error) {
+					emitEvent(EVENT_COPY_FILE_ERROR, error, {
+						src: srcPath,
+						dest: destPath,
+						stats: stats
+					});
+					return reject(error);
 				}
 			});
 		}
 
 		function copySymlink(srcPath, destPath, srcRoot, destRoot, stats, options) {
+			emitEvent(EVENT_CREATE_SYMLINK_START, {
+				src: srcPath,
+				dest: destPath,
+				stats: stats
+			});
 			return readlink(srcPath)
 				.then(function(link) {
 					return symlink(link, destPath)
 						.then(function() {
+							emitEvent(EVENT_CREATE_SYMLINK_COMPLETE, {
+								src: srcPath,
+								dest: destPath,
+								stats: stats
+							});
 							return {
 								src: srcPath,
 								dest: destPath,
 								stats: stats
 							};
 						});
+				})
+				.catch(function(error) {
+					emitEvent(EVENT_CREATE_SYMLINK_ERROR, error, {
+						src: srcPath,
+						dest: destPath,
+						stats: stats
+					});
+					throw error;
 				});
 		}
 
 		function copyDirectory(srcPath, destPath, srcRoot, destRoot, stats, options) {
+			emitEvent(EVENT_CREATE_DIRECTORY_START, {
+				src: srcPath,
+				dest: destPath,
+				stats: stats
+			});
 			return mkdir(destPath)
 				.catch(function(error) {
 					var shouldIgnoreError = error.code === 'EEXIST';
 					if (shouldIgnoreError) { return; }
+					emitEvent(EVENT_CREATE_DIRECTORY_ERROR, error, {
+						src: srcPath,
+						dest: destPath,
+						stats: stats
+					});
 					throw error;
 				})
 				.then(function() {
+					emitEvent(EVENT_CREATE_DIRECTORY_COMPLETE, {
+						src: srcPath,
+						dest: destPath,
+						stats: stats
+					});
 					return readdir(srcPath)
 						.then(function(filenames) {
 							var filePaths = filenames.map(function(filename) {
@@ -262,3 +378,16 @@ module.exports = function(src, dest, options, callback) {
 	}
 };
 
+module.exports.events = {
+	ERROR: EVENT_ERROR,
+	COMPLETE: EVENT_COMPLETE,
+	CREATE_DIRECTORY_START: EVENT_CREATE_DIRECTORY_START,
+	CREATE_DIRECTORY_ERROR: EVENT_CREATE_DIRECTORY_ERROR,
+	CREATE_DIRECTORY_COMPLETE: EVENT_CREATE_DIRECTORY_COMPLETE,
+	CREATE_SYMLINK_START: EVENT_CREATE_SYMLINK_START,
+	CREATE_SYMLINK_ERROR: EVENT_CREATE_SYMLINK_ERROR,
+	CREATE_SYMLINK_COMPLETE: EVENT_CREATE_SYMLINK_COMPLETE,
+	COPY_FILE_START: EVENT_COPY_FILE_START,
+	COPY_FILE_ERROR: EVENT_COPY_FILE_ERROR,
+	COPY_FILE_COMPLETE: EVENT_COPY_FILE_COMPLETE
+};
