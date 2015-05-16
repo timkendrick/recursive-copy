@@ -200,6 +200,51 @@ describe('copy()', function() {
 				]);
 			});
 		});
+
+		it('should copy symlinks', function() {
+			return copy(
+				getSourcePath('symlink'),
+				getDestinationPath('symlink')
+			).then(function(results) {
+				var actual, expected;
+				actual = fs.readlinkSync(getDestinationPath('symlink'));
+				expected = '.';
+				expect(actual).to.equal(expected);
+			});
+		});
+
+		it('should return results for symlinks', function() {
+			return copy(
+				getSourcePath('symlink'),
+				getDestinationPath('symlink')
+			).then(function(results) {
+				checkResults(results, ['symlink']);
+			});
+		});
+
+		it('should copy nested symlinks', function() {
+			return copy(
+				getSourcePath('nested-symlink'),
+				getDestinationPath('nested-symlink')
+			).then(function(results) {
+				var actual, expected;
+				actual = fs.readlinkSync(getDestinationPath('nested-symlink/symlink'));
+				expected = '.';
+				expect(actual).to.equal(expected);
+			});
+		});
+
+		it('should return results for symlinks', function() {
+			return copy(
+				getSourcePath('nested-symlink'),
+				getDestinationPath('nested-symlink')
+			).then(function(results) {
+				checkResults(results, [
+					'nested-symlink',
+					'nested-symlink/symlink'
+				]);
+			});
+		});
 	});
 
 	describe('options', function() {
