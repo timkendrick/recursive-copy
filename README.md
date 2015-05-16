@@ -12,6 +12,7 @@
 - Choose whether to copy system files
 - Filters out [junk](https://www.npmjs.com/package/junk) files by default
 - Uses [graceful-fs](https://www.npmjs.com/package/graceful-fs) and [mkdirp](https://www.npmjs.com/package/mkdirp) to avoid filesystem errors
+- Emits start, finish and error events for each file that is processed
 - Optional promise-based interface
 
 ## Examples
@@ -71,15 +72,22 @@ var options = {
 	}
 };
 
-copy('src', 'dest', options, function(error, results) {
-	if (error) {
+copy('src', 'dest', options)
+	.on(copy.events.COPY_FILE_START, function(copyOperation) {
+		console.info('Copying file ' + copyOperation.src + '...');
+	})
+	.on(copy.events.COPY_FILE_COMPLETE, function(copyOperation) {
+		console.info('Copied to ' + copyOperation.dest);
+	})
+	.on(copy.events.ERROR, function(error, copyOperation) {
+		console.error('Unable to copy ' + copyOperation.dest);
+	})
+	.then(function(results) {
+		console.info(copiedFiles.length + ' file(s) copied');
+	})
+	.catch(function(error) {
 		return console.error('Copy failed: ' + error);
-	}
-	var copiedFiles = results.map(function(result) {
-		return result.stats.isFile();
 	});
-	console.info(copiedFiles.length + ' file(s) copied');
-});
 ```
 
 
@@ -131,3 +139,38 @@ Returns:
 	}
 ]
 ```
+
+## Events
+
+The return value of the `copy` function also implements the `EventEmitter` interface, and emits the following events:
+
+| Event | Handler signature |
+| ----- | ----------------- |
+| `copy.events.ERROR` | `function(error, ErrorInfo)` |
+| `copy.events.COMPLETE` | `function(Array<CopyOperation>)` |
+| `copy.events.CREATE_DIRECTORY_START` | `function(CopyOperation)` |
+| `copy.events.CREATE_DIRECTORY_ERROR` | `function(error, CopyOperation)` |
+| `copy.events.CREATE_DIRECTORY_COMPLETE` | `function(CopyOperation)` |
+| `copy.events.CREATE_SYMLINK_START` | `function(CopyOperation)` |
+| `copy.events.CREATE_SYMLINK_ERROR` | `function(error, CopyOperation)` |
+| `copy.events.CREATE_SYMLINK_COMPLETE` | `function(CopyOperation)` |
+| `copy.events.COPY_FILE_START` | `function(CopyOperation)` |
+| `copy.events.COPY_FILE_ERROR` | `function(error, CopyOperation)` |
+| `copy.events.COPY_FILE_COMPLETE` | `function(CopyOperation)` |
+
+...where the types referred to in the handler signature are as follows:
+
+### `ErrorInfo`
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `src` | `string` | Source path of the file/folder/symlink that failed to copy |
+| `dest` | `string` | Destination path of the file/folder/symlink that failed to copy |
+
+### `CopyOperation`
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `src` | `string` | Source path of the relevant file/folder/symlink |
+| `dest` | `string` | Destination path of the relevant file/folder/symlink |
+| `stats ` | `fs.Stats` | Stats for the relevant file/folder/symlink |
