@@ -33,15 +33,7 @@ module.exports = function(src, dest, options, callback) {
 	var destRoot = dest;
 	return copy(src, dest, srcRoot, destRoot, options)
 		.then(function(result) {
-			return (function getFlattenedResults(result) {
-				return [result].concat(
-					(result.files || []).map(function(result) {
-						return getFlattenedResults(result);
-					}).reduce(function(results, result) {
-						return results.concat(result);
-					}, [])
-				);
-			})(result);
+			return flattenResultsTree(result);
 		})
 		.finally(function() {
 			hasFinished = true;
@@ -121,13 +113,19 @@ module.exports = function(src, dest, options, callback) {
 		};
 	}
 
+	function flattenResultsTree(result) {
+		return (result.files || []).reduce(function(results, result) {
+			return results.concat(flattenResultsTree(result));
+		}, [result]);
+	}
+
 	function copy(srcPath, destPath, srcRoot, destRoot, options) {
 		return prepareForCopy(srcPath, destPath, options)
 			.then(function(stats) {
 				if (stats.isDirectory()) {
 					return copyDirectory(srcPath, destPath, srcRoot, destRoot, stats, options);
 				} else if (stats.isSymbolicLink()) {
-					return copySymbolicLink(srcPath, destPath, srcRoot, destRoot, stats, options);
+					return copySymlink(srcPath, destPath, srcRoot, destRoot, stats, options);
 				} else {
 					return copyFile(srcPath, destPath, srcRoot, destRoot, stats, options);
 				}
@@ -194,7 +192,7 @@ module.exports = function(src, dest, options, callback) {
 			});
 		}
 
-		function copySymbolicLink(srcPath, destPath, srcRoot, destRoot, stats, options) {
+		function copySymlink(srcPath, destPath, srcRoot, destRoot, stats, options) {
 			return readlink(srcPath)
 				.then(function(link) {
 					return symlink(link, destPath)
@@ -252,14 +250,15 @@ module.exports = function(src, dest, options, callback) {
 			}));
 		}
 	}
+
+	function fsError(code, path) {
+		var errorType = errno.code[code];
+		var message = errorType.code + ', ' + errorType.description + ' ' + path;
+		var error = new Error(message);
+		error.errno = errorType.errno;
+		error.code = errorType.code;
+		error.path = path;
+		return error;
+	}
 };
 
-function fsError(code, path) {
-	var errorType = errno.code[code];
-	var message = errorType.code + ', ' + errorType.description + ' ' + path;
-	var error = new Error(message);
-	error.errno = errorType.errno;
-	error.code = errorType.code;
-	error.path = path;
-	return error;
-}
