@@ -3,6 +3,12 @@
   "version": "1.0.1",
   "description": "Simple, flexible file copy utility",
   "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "test": "mocha --reporter spec"
   },
