@@ -128,7 +128,110 @@ describe('copy()', function() {
 			});
 		});
 
+		it('should copy empty directories', function() {
+			return copy(
+				getSourcePath('empty'),
+				getDestinationPath('empty')
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'empty': {}
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should return results for empty directories', function() {
+			return copy(
+				getSourcePath('empty'),
+				getDestinationPath('empty')
+			).then(function(results) {
+				checkResults(results, [
+					'empty'
+				]);
+			});
+		});
+
 		it('should copy directories', function() {
+			return copy(
+				getSourcePath('directory'),
+				getDestinationPath('directory')
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'directory': {
+								'1': {
+									'1-1': {
+										'1-1-a': '1-1-a\n',
+										'1-1-b': '1-1-b\n'
+									},
+									'1-2': {
+										'1-2-a': '1-2-a\n',
+										'1-2-b': '1-2-b\n'
+									},
+									'1-a': '1-a\n',
+									'1-b': '1-b\n'
+								},
+								'2': {
+									'2-1': {
+										'2-1-a': '2-1-a\n',
+										'2-1-b': '2-1-b\n'
+									},
+									'2-2': {
+										'2-2-a': '2-2-a\n',
+										'2-2-b': '2-2-b\n'
+									},
+									'2-a': '2-a\n',
+									'2-b': '2-b\n'
+								},
+								'a': 'a\n',
+								'b': 'b\n'
+							}
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should return results for directories', function() {
+			return copy(
+				getSourcePath('directory'),
+				getDestinationPath('directory')
+			).then(function(results) {
+				checkResults(results, [
+					'directory',
+					'directory/1',
+					'directory/1/1-1',
+					'directory/1/1-1/1-1-a',
+					'directory/1/1-1/1-1-b',
+					'directory/1/1-2',
+					'directory/1/1-2/1-2-a',
+					'directory/1/1-2/1-2-b',
+					'directory/1/1-a',
+					'directory/1/1-b',
+					'directory/2',
+					'directory/2/2-1',
+					'directory/2/2-1/2-1-a',
+					'directory/2/2-1/2-1-b',
+					'directory/2/2-2',
+					'directory/2/2-2/2-2-a',
+					'directory/2/2-2/2-2-b',
+					'directory/2/2-a',
+					'directory/2/2-b',
+					'directory/a',
+					'directory/b'
+				]);
+			});
+		});
+
+		it('should merge directories into existing directories', function() {
 			return copy(
 				getSourcePath('directory'),
 				getDestinationPath()
@@ -167,37 +270,6 @@ describe('copy()', function() {
 						};
 						expect(actual).to.eql(expected);
 					});
-			});
-		});
-
-		it('should return results for directories', function() {
-			return copy(
-				getSourcePath('directory'),
-				getDestinationPath('directory')
-			).then(function(results) {
-				checkResults(results, [
-					'directory',
-					'directory/1',
-					'directory/1/1-1',
-					'directory/1/1-1/1-1-a',
-					'directory/1/1-1/1-1-b',
-					'directory/1/1-2',
-					'directory/1/1-2/1-2-a',
-					'directory/1/1-2/1-2-b',
-					'directory/1/1-a',
-					'directory/1/1-b',
-					'directory/2',
-					'directory/2/2-1',
-					'directory/2/2-1/2-1-a',
-					'directory/2/2-1/2-1-b',
-					'directory/2/2-2',
-					'directory/2/2-2/2-2-a',
-					'directory/2/2-2/2-2-b',
-					'directory/2/2-a',
-					'directory/2/2-b',
-					'directory/a',
-					'directory/b'
-				]);
 			});
 		});
 
