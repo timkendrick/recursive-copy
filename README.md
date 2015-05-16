@@ -64,7 +64,7 @@ var options = {
 	rename: function(filePath) {
 		return filePath + '.orig';
 	},
-	transform: function(src, dest, cwd, stats) {
+	transform: function(src, dest, stats) {
 		return through(function(chunk, enc, done)  {
 			var output = chunk.toString().toUpperCase();
 			done(null, output);
