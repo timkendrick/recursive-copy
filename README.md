@@ -42,7 +42,6 @@ copy('src', 'dest')
 	.catch(function(error) {
 		console.error('Copy failed: ' + error);
 	});
-});
 ```
 
 #### Advanced options
