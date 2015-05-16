@@ -109,13 +109,14 @@ module.exports = function(src, dest, options, callback) {
 	}
 
 	function wrapFsMethod(fn) {
-		var promiser = Promise.denodeify(fn);
+		// Convert from node-style callbacks to promises
+		var wrappedFn = Promise.denodeify(fn);
 		return function() {
 			// Multiple chains of promises are fired in parallel,
 			// so when one fails we need to prevent any future
 			// filesystem operations
 			if (hasFinished) { return Promise.reject(); }
-			return promiser.apply(null, arguments);
+			return wrappedFn.apply(null, arguments);
 		};
 	}
 
@@ -218,7 +219,7 @@ module.exports = function(src, dest, options, callback) {
 							var filePaths = filenames.map(function(filename) {
 								return path.join(srcPath, filename);
 							});
-							return copyFileSet(filePaths, srcRoot, destRoot, options)
+							return copyFileset(filePaths, srcRoot, destRoot, options)
 								.then(function(files) {
 									return {
 										src: srcPath,
@@ -231,7 +232,7 @@ module.exports = function(src, dest, options, callback) {
 				});
 		}
 
-		function copyFileSet(filePaths, srcRoot, destRoot, options) {
+		function copyFileset(filePaths, srcRoot, destRoot, options) {
 			var copyOperations = filePaths.map(function(filePath) {
 				return path.relative(srcRoot, filePath);
 			}).filter(function(relativePath) {
