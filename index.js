@@ -27,6 +27,7 @@ module.exports = function(src, dest, options, callback) {
 	var readlink = wrapFsMethod(fs.readlink);
 	var symlink = wrapFsMethod(fs.symlink);
 	var readdir = wrapFsMethod(fs.readdir);
+	var chmod = wrapFsMethod(fs.chmod);
 
 	var srcRoot = src;
 	var destRoot = dest;
@@ -172,13 +173,14 @@ module.exports = function(src, dest, options, callback) {
 				var write = fs.createWriteStream(destPath, { flags: 'w' });
 				write.on('error', reject);
 				write.on('finish', function() {
-					fs.chmod(destPath, stats.mode, function() {
-						return resolve({
-							src: srcPath,
-							dest: destPath,
-							stats: stats
+					chmod(destPath, stats.mode)
+						.then(function() {
+							return resolve({
+								src: srcPath,
+								dest: destPath,
+								stats: stats
+							});
 						});
-					});
 				});
 
 				var transformStream = null;
