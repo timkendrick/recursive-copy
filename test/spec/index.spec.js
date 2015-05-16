@@ -1081,6 +1081,17 @@ describe('copy()', function() {
 			expect(actual).to.eql(expected);
 		});
 
+		it('should allow event listeners to be chained', function() {
+			var emitter = copy(
+				getSourcePath('file'),
+				getDestinationPath('file')
+			);
+			var actual, expected;
+			actual = emitter.on('complete', function() {});
+			expected = emitter;
+			expect(actual).to.equal(expected);
+		});
+
 		it('should emit file copy events', function() {
 			var emitter = copy(
 				getSourcePath('file'),

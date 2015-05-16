@@ -151,11 +151,32 @@ module.exports = function(src, dest, options, callback) {
 	}
 
 	function mixinEmitterMethods(object, emitter) {
-		Object.keys(EventEmitter.prototype).filter(function(memberName) {
-			return typeof emitter[memberName] === 'function';
-		}).forEach(function(methodName) {
-			object[methodName] = emitter[methodName].bind(emitter);
-		});
+		object.addListener = function(event, listener) {
+			emitter.addListener(event, listener);
+			return this;
+		};
+		object.emit = emitter.emit.bind(emitter);
+		object.listeners = emitter.listeners.bind(emitter);
+		object.on = function(event, listener) {
+			emitter.on(event, listener);
+			return this;
+		};
+		object.once = function(event, listener) {
+			emitter.once(event, listener);
+			return this;
+		};
+		object.removeAllListeners = function(event) {
+			emitter.removeAllListeners(event);
+			return this;
+		};
+		object.removeListener = function(event, listener) {
+			emitter.removeListener(event, listener);
+			return this;
+		};
+		object.setMaxListeners = function(n) {
+			emitter.removeListener(n);
+			return this;
+		};
 		return object;
 	}
 
