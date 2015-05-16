@@ -1,9 +1,10 @@
-#recursive-copy [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges) [![Build Status](https://travis-ci.org/timkendrick/recursive-copy.svg?branch=master)](https://travis-ci.org/timkendrick/recursive-copy)
+# recursive-copy [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges) [![Build Status](https://travis-ci.org/timkendrick/recursive-copy.svg?branch=master)](https://travis-ci.org/timkendrick/recursive-copy)
 
 > Simple, flexible file copy utility
 
 ## Features
 
+- Recursively copy whole directory hierarchies
 - Choose which files are copied by passing a filter function, regular expression or glob
 - Rename files dynamically, including changing the output path
 - Transform file contents using streams
