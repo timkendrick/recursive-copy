@@ -175,6 +175,9 @@ module.exports = function(src, dest, options, callback) {
 				}
 			})
 			.catch(function(error) {
+				if (error instanceof CopyError) {
+					throw error;
+				}
 				var copyError = new CopyError(error.message);
 				copyError.error = error;
 				copyError.data = {
@@ -223,6 +226,8 @@ module.exports = function(src, dest, options, callback) {
 					dest: destPath,
 					stats: stats
 				});
+				var hasFinished = false;
+
 				var read = fs.createReadStream(srcPath);
 				read.on('error', handleCopyFailed);
 
@@ -231,6 +236,7 @@ module.exports = function(src, dest, options, callback) {
 				write.on('finish', function() {
 					chmod(destPath, stats.mode)
 						.then(function() {
+							hasFinished = true;
 							emitEvent(EVENT_COPY_FILE_COMPLETE, {
 								src: srcPath,
 								dest: destPath,
@@ -258,6 +264,8 @@ module.exports = function(src, dest, options, callback) {
 
 
 				function handleCopyFailed(error) {
+					if (hasFinished) { return; }
+					hasFinished = true;
 					if (typeof read.close === 'function') {
 						read.close();
 					}
