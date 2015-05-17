@@ -23,41 +23,31 @@ var COPY_EVENTS = Object.keys(copy.events).map(function(key) {
 chai.use(chaiAsPromised);
 
 describe('copy()', function() {
-	before(function() {
-		try {
-			fs.mkdirSync(DESTINATION_PATH);
-		} catch (error) {
-			del.sync(path.join(DESTINATION_PATH, '**/*'), {
-				dot: true,
-				force: true
-			});
-		}
-	});
-
-	beforeEach(function() {
-		try {
-			fs.mkdirSync(DESTINATION_PATH);
-		} catch (error) {
-			del.sync(path.join(DESTINATION_PATH, '**/*'), {
-				dot: true,
-				force: true
-			});
-		}
-	});
-
-	afterEach(function() {
-		del.sync(path.join(DESTINATION_PATH, '**/*'), {
-			dot: true,
-			force: true
+	beforeEach(function(done) {
+		fs.mkdir(DESTINATION_PATH, function(error) {
+			if (error) {
+				del(path.join(DESTINATION_PATH, '**/*'), {
+					dot: true,
+					force: true
+				}, done);
+			} else {
+				done();
+			}
 		});
 	});
 
-	after(function() {
-		del.sync(path.join(DESTINATION_PATH, '**/*'), {
+	afterEach(function(done) {
+		del(DESTINATION_PATH, {
 			dot: true,
 			force: true
+		}, function(error) {
+			if (error) {
+				console.log('ERROR:', error);
+				done(error);
+			} else {
+				done();
+			}
 		});
-		fs.rmdirSync(DESTINATION_PATH);
 	});
 
 	function getSourcePath(filename) {
@@ -882,7 +872,7 @@ describe('copy()', function() {
 					}
 				}
 			);
-			expect(actual).to.be.rejectedWith(expected);
+			return expect(actual).to.be.rejectedWith(expected);
 		});
 	});
 
@@ -1082,23 +1072,23 @@ describe('copy()', function() {
 		});
 
 		it('should allow event listeners to be chained', function() {
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('file'),
 				getDestinationPath('file')
 			);
 			var actual, expected;
-			actual = emitter.on('complete', function() {});
-			expected = emitter;
+			actual = copier.on('complete', function() {});
+			expected = copier;
 			expect(actual).to.equal(expected);
 		});
 
 		it('should emit file copy events', function() {
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('file'),
 				getDestinationPath('file')
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.then(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.then(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
@@ -1126,12 +1116,12 @@ describe('copy()', function() {
 		it('should emit error events', function() {
 			fs.writeFileSync(getDestinationPath('file'), '');
 
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('file'),
 				getDestinationPath('file')
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.catch(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.catch(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
@@ -1169,7 +1159,7 @@ describe('copy()', function() {
 		});
 
 		it('should emit file copy error events', function() {
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('file'),
 				getDestinationPath('file'),
 				{
@@ -1180,8 +1170,8 @@ describe('copy()', function() {
 					}
 				}
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.catch(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.catch(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
@@ -1249,12 +1239,12 @@ describe('copy()', function() {
 		});
 
 		it('should emit directory copy events', function() {
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('empty'),
 				getDestinationPath('empty')
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.then(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.then(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
@@ -1282,12 +1272,12 @@ describe('copy()', function() {
 		it('should emit directory copy error events', function() {
 			var unmockMkdirp = mockMkdirp(copy);
 
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('empty'),
 				getDestinationPath('empty')
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.catch(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.catch(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
@@ -1360,12 +1350,12 @@ describe('copy()', function() {
 		it('should emit symlink copy error events', function() {
 			var umockSymlink = mockSymlink(copy);
 
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('symlink'),
 				getDestinationPath('symlink')
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.catch(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.catch(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
@@ -1436,12 +1426,12 @@ describe('copy()', function() {
 		});
 
 		it('should emit symlink copy events', function() {
-			var emitter = copy(
+			var copier = copy(
 				getSourcePath('symlink'),
 				getDestinationPath('symlink')
 			);
-			var events = listenTo(emitter, COPY_EVENTS);
-			return emitter.then(function() {
+			var events = listenTo(copier, COPY_EVENTS);
+			return copier.then(function() {
 				var actual, expected;
 
 				var eventNames = events.map(function(event) {
