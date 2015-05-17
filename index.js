@@ -49,6 +49,7 @@ module.exports = function(src, dest, options, callback) {
 	var srcRoot = src;
 	var destRoot = dest;
 
+	var emitter;
 	var promise = copy(src, dest, srcRoot, destRoot, options)
 		.then(function(result) {
 			return flattenResultsTree(result);
@@ -69,13 +70,13 @@ module.exports = function(src, dest, options, callback) {
 			hasFinished = true;
 		});
 
-	var emitter;
 	if (typeof callback === 'function') {
 		promise.nodeify(callback);
 		emitter = new EventEmitter();
 	} else {
 		emitter = emitterMixin(promise);
 	}
+
 	return emitter;
 
 
