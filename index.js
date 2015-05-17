@@ -258,6 +258,12 @@ module.exports = function(src, dest, options, callback) {
 
 
 				function handleCopyFailed(error) {
+					if (typeof read.close === 'function') {
+						read.close();
+					}
+					if (typeof write.close === 'function') {
+						write.close();
+					}
 					emitEvent(EVENT_COPY_FILE_ERROR, error, {
 						src: srcPath,
 						dest: destPath,
