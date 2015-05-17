@@ -897,7 +897,7 @@ describe('copy()', function() {
 			});
 		});
 
-		it('should throw an error on a transform stream error event', function() {
+		it('should throw an error on a transform stream error', function() {
 			var actual, expected;
 			expected = 'Stream error';
 			actual = copy(
@@ -912,6 +912,36 @@ describe('copy()', function() {
 				}
 			);
 			return expect(actual).to.be.rejectedWith(expected);
+		});
+
+		it('should throw the original error on nested file error', function() {
+			return copy(
+				getSourcePath('directory'),
+				getDestinationPath('directory'),
+				{
+					transform: function(src, dest, stats) {
+						return through(function(chunk, enc, done) {
+							if (src === getSourcePath('directory/1/1-1/1-1-a')) {
+								done(new Error('Stream error'));
+							} else {
+								done(null, chunk);
+							}
+						});
+					}
+				}
+			).then(function() {
+				throw new Error('Should throw error');
+			}).catch(function(error) {
+				var actual, expected;
+
+				actual = error.name;
+				expected = 'Error';
+				expect(actual).to.equal(expected);
+
+				actual = error.message;
+				expected = 'Stream error';
+				expect(actual).to.equal(expected);
+			});
 		});
 	});
 
@@ -1044,9 +1074,9 @@ describe('copy()', function() {
 					expect(results).not.to.exist;
 
 					var actual, expected;
-					actual = function() { throw error; };
+					actual = error.code;
 					expected = 'ENOENT';
-					expect(actual).to.throw(expected);
+					expect(actual).to.equal(expected);
 
 					done();
 				}
@@ -1080,9 +1110,9 @@ describe('copy()', function() {
 					expect(results).not.to.exist;
 
 					var actual, expected;
-					actual = function() { throw error; };
+					actual = error.code;
 					expected = 'ENOENT';
-					expect(actual).to.throw(expected);
+					expect(actual).to.equal(expected);
 
 					done();
 				}
@@ -1185,9 +1215,9 @@ describe('copy()', function() {
 				var error = eventArgs[0];
 				var copyOperation = eventArgs[1];
 
-				actual = function() { throw error; };
+				actual = error.code;
 				expected = 'EEXIST';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = copyOperation.src;
 				expected = getSourcePath('file');
@@ -1236,9 +1266,9 @@ describe('copy()', function() {
 				var error = eventArgs[0];
 				var copyOperation = eventArgs[1];
 
-				actual = function() { throw error; };
+				actual = error.message;
 				expected = 'Stream error';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = copyOperation.src;
 				expected = getSourcePath('file');
@@ -1261,9 +1291,9 @@ describe('copy()', function() {
 				var fileError = fileErrorEventArgs[0];
 				var fileCopyOperation = fileErrorEventArgs[1];
 
-				actual = function() { throw fileError; };
+				actual = fileError.message;
 				expected = 'Stream error';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = fileCopyOperation.src;
 				expected = getSourcePath('file');
@@ -1344,9 +1374,9 @@ describe('copy()', function() {
 				var error = eventArgs[0];
 				var copyOperation = eventArgs[1];
 
-				actual = function() { throw error; };
+				actual = error.message;
 				expected = 'Test error';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = copyOperation.src;
 				expected = getSourcePath('empty');
@@ -1369,9 +1399,9 @@ describe('copy()', function() {
 				var directoryError = directoryErrorEventArgs[0];
 				var directoryCopyOperation = directoryErrorEventArgs[1];
 
-				actual = function() { throw directoryError; };
+				actual = directoryError.message;
 				expected = 'Test error';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = directoryCopyOperation.src;
 				expected = getSourcePath('empty');
@@ -1423,9 +1453,9 @@ describe('copy()', function() {
 				var error = eventArgs[0];
 				var copyOperation = eventArgs[1];
 
-				actual = function() { throw error; };
+				actual = error.message;
 				expected = 'Test error';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = copyOperation.src;
 				expected = getSourcePath('symlink');
@@ -1448,9 +1478,9 @@ describe('copy()', function() {
 				var symlinkError = symlinkErrorEventArgs[0];
 				var symlinkCopyOperation = symlinkErrorEventArgs[1];
 
-				actual = function() { throw symlinkError; };
+				actual = symlinkError.message;
 				expected = 'Test error';
-				expect(actual).to.throw(expected);
+				expect(actual).to.equal(expected);
 
 				actual = symlinkCopyOperation.src;
 				expected = getSourcePath('symlink');
