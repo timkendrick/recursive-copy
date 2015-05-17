@@ -1149,6 +1149,7 @@ describe('copy()', function() {
 			actual = copier.on('complete', function() {});
 			expected = copier;
 			expect(actual).to.equal(expected);
+			return copier;
 		});
 
 		it('should emit file copy events', function() {
