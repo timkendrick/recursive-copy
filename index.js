@@ -9,6 +9,7 @@ var mkdirp = require('mkdirp');
 var junk = require('junk');
 var errno = require('errno');
 var minimatch = require('minimatch');
+var emitterMixin = require('emitter-mixin');
 
 var CopyError = errno.custom.createError('CopyError');
 
@@ -48,8 +49,6 @@ module.exports = function(src, dest, options, callback) {
 	var srcRoot = src;
 	var destRoot = dest;
 
-	var emitter = new EventEmitter();
-
 	var promise = copy(src, dest, srcRoot, destRoot, options)
 		.then(function(result) {
 			return flattenResultsTree(result);
@@ -70,12 +69,14 @@ module.exports = function(src, dest, options, callback) {
 			hasFinished = true;
 		});
 
+	var emitter;
 	if (typeof callback === 'function') {
 		promise.nodeify(callback);
-		return emitter;
+		emitter = new EventEmitter();
 	} else {
-		return mixinEmitterMethods(promise, emitter);
+		emitter = emitterMixin(promise);
 	}
+	return emitter;
 
 
 	function getCombinedFilter(options) {
@@ -148,36 +149,6 @@ module.exports = function(src, dest, options, callback) {
 			if (hasFinished) { return Promise.reject(); }
 			return wrappedFn.apply(null, arguments);
 		};
-	}
-
-	function mixinEmitterMethods(object, emitter) {
-		object.addListener = function(event, listener) {
-			emitter.addListener(event, listener);
-			return this;
-		};
-		object.emit = emitter.emit.bind(emitter);
-		object.listeners = emitter.listeners.bind(emitter);
-		object.on = function(event, listener) {
-			emitter.on(event, listener);
-			return this;
-		};
-		object.once = function(event, listener) {
-			emitter.once(event, listener);
-			return this;
-		};
-		object.removeAllListeners = function(event) {
-			emitter.removeAllListeners(event);
-			return this;
-		};
-		object.removeListener = function(event, listener) {
-			emitter.removeListener(event, listener);
-			return this;
-		};
-		object.setMaxListeners = function(n) {
-			emitter.removeListener(n);
-			return this;
-		};
-		return object;
 	}
 
 	function emitEvent(event, args) {
