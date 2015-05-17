@@ -70,28 +70,44 @@ describe('copy()', function() {
 		});
 	}
 
-	function checkResults(results, expectedFilenames) {
+	function checkResults(results, expectedResults) {
 		var actual, expected;
-		actual = results.reduce(function(files, file) {
-			files[file.src] = file.dest;
-			return files;
+		actual = results.reduce(function(paths, copyOperation) {
+			paths[copyOperation.src] = copyOperation.dest;
+			return paths;
 		}, {});
-		expected = expectedFilenames.map(function(filename) {
+		expected = Object.keys(expectedResults).map(function(filename) {
 			return {
 				src: getSourcePath(path.join(filename)),
 				dest: getDestinationPath(filename)
 			};
-		}).reduce(function(files, file) {
-			files[file.src] = file.dest;
-			return files;
+		}).reduce(function(paths, copyOperation) {
+			paths[copyOperation.src] = copyOperation.dest;
+			return paths;
 		}, {});
 		expect(actual).to.eql(expected);
 
-		results.forEach(function(file) {
-			expected = 'function';
-			actual = file.stats && file.stats.isDirectory;
-			expect(actual).to.be.a(expected);
-		});
+		actual = results.reduce(function(stats, copyOperation) {
+			stats[copyOperation.dest] = getFileType(copyOperation.stats);
+			return stats;
+		}, {});
+		expected = Object.keys(expectedResults).map(function(filename) {
+			return {
+				dest: getDestinationPath(filename),
+				type: expectedResults[filename]
+			};
+		}).reduce(function(paths, copyOperation) {
+			paths[copyOperation.dest] = copyOperation.type;
+			return paths;
+		}, {});
+		expect(actual).to.eql(expected);
+
+
+		function getFileType(stats) {
+			if (stats.isDirectory()) { return 'dir'; }
+			if (stats.isSymbolicLink()) { return 'symlink'; }
+			return 'file';
+		}
 	}
 
 	function createSymbolicLink(src, dest, type) {
@@ -184,9 +200,9 @@ describe('copy()', function() {
 				getSourcePath('file'),
 				getDestinationPath('file')
 			).then(function(results) {
-				checkResults(results, [
-					'file'
-				]);
+				checkResults(results, {
+					'file': 'file'
+				});
 			});
 		});
 
@@ -212,9 +228,9 @@ describe('copy()', function() {
 				getSourcePath('empty'),
 				getDestinationPath('empty')
 			).then(function(results) {
-				checkResults(results, [
-					'empty'
-				]);
+				checkResults(results, {
+					'empty': 'dir'
+				});
 			});
 		});
 
@@ -267,29 +283,29 @@ describe('copy()', function() {
 				getSourcePath('directory'),
 				getDestinationPath('directory')
 			).then(function(results) {
-				checkResults(results, [
-					'directory',
-					'directory/1',
-					'directory/1/1-1',
-					'directory/1/1-1/1-1-a',
-					'directory/1/1-1/1-1-b',
-					'directory/1/1-2',
-					'directory/1/1-2/1-2-a',
-					'directory/1/1-2/1-2-b',
-					'directory/1/1-a',
-					'directory/1/1-b',
-					'directory/2',
-					'directory/2/2-1',
-					'directory/2/2-1/2-1-a',
-					'directory/2/2-1/2-1-b',
-					'directory/2/2-2',
-					'directory/2/2-2/2-2-a',
-					'directory/2/2-2/2-2-b',
-					'directory/2/2-a',
-					'directory/2/2-b',
-					'directory/a',
-					'directory/b'
-				]);
+				checkResults(results, {
+					'directory': 'dir',
+					'directory/1': 'dir',
+					'directory/1/1-1': 'dir',
+					'directory/1/1-1/1-1-a': 'file',
+					'directory/1/1-1/1-1-b': 'file',
+					'directory/1/1-2': 'dir',
+					'directory/1/1-2/1-2-a': 'file',
+					'directory/1/1-2/1-2-b': 'file',
+					'directory/1/1-a': 'file',
+					'directory/1/1-b': 'file',
+					'directory/2': 'dir',
+					'directory/2/2-1': 'dir',
+					'directory/2/2-1/2-1-a': 'file',
+					'directory/2/2-1/2-1-b': 'file',
+					'directory/2/2-2': 'dir',
+					'directory/2/2-2/2-2-a': 'file',
+					'directory/2/2-2/2-2-b': 'file',
+					'directory/2/2-a': 'file',
+					'directory/2/2-b': 'file',
+					'directory/a': 'file',
+					'directory/b': 'file'
+				});
 			});
 		});
 
@@ -354,7 +370,9 @@ describe('copy()', function() {
 				getSourcePath('symlink'),
 				getDestinationPath('symlink')
 			).then(function(results) {
-				checkResults(results, ['symlink']);
+				checkResults(results, {
+					'symlink': 'symlink'
+				});
 			});
 		});
 
@@ -377,10 +395,10 @@ describe('copy()', function() {
 				getSourcePath('nested-symlink'),
 				getDestinationPath('nested-symlink')
 			).then(function(results) {
-				checkResults(results, [
-					'nested-symlink',
-					'nested-symlink/symlink'
-				]);
+				checkResults(results, {
+					'nested-symlink': 'dir',
+					'nested-symlink/symlink': 'symlink'
+				});
 			});
 		});
 	});
@@ -1008,9 +1026,9 @@ describe('copy()', function() {
 					expect(results).to.exist;
 					expect(error).not.to.exist;
 
-					checkResults(results, [
-						'file'
-					]);
+					checkResults(results, {
+						'file': 'file'
+					});
 
 					done();
 				}
@@ -1044,9 +1062,9 @@ describe('copy()', function() {
 					expect(results).to.exist;
 					expect(error).not.to.exist;
 
-					checkResults(results, [
-						'file'
-					]);
+					checkResults(results, {
+						'file': 'file'
+					});
 
 					done();
 				}
@@ -1130,7 +1148,9 @@ describe('copy()', function() {
 				expect(actual).to.equal(expected);
 
 				var results = eventArgs[0];
-				checkResults(results, ['file']);
+				checkResults(results, {
+					'file': 'file'
+				});
 			});
 		});
 
@@ -1286,7 +1306,9 @@ describe('copy()', function() {
 				expect(actual).to.equal(expected);
 
 				var results = eventArgs[0];
-				checkResults(results, ['empty']);
+				checkResults(results, {
+					'empty': 'dir'
+				});
 			});
 		});
 
@@ -1475,7 +1497,9 @@ describe('copy()', function() {
 				expect(actual).to.equal(expected);
 
 				var results = eventArgs[0];
-				checkResults(results, ['symlink']);
+				checkResults(results, {
+					'symlink': 'symlink'
+				});
 			});
 		});
 	});
