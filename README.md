@@ -1,4 +1,8 @@
-# recursive-copy [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges) [![Build Status](https://travis-ci.org/timkendrick/recursive-copy.svg?branch=master)](https://travis-ci.org/timkendrick/recursive-copy)
+# recursive-copy
+[![npm version](https://img.shields.io/npm/v/recursive-copy.svg)](https://www.npmjs.com/package/recursive-copy)
+![Stability](https://img.shields.io/badge/stability-stable-brightgreen.svg)
+[![Build Status](https://travis-ci.org/timkendrick/recursive-copy.svg?branch=master)](https://travis-ci.org/timkendrick/recursive-copy)
+[![Windows Build Status](https://img.shields.io/appveyor/ci/timkendrick/recursive-copy/master.svg?label=windows%20build)](https://ci.appveyor.com/project/timkendrick/recursive-copy/branch/master)
 
 > Simple, flexible file copy utility
 
