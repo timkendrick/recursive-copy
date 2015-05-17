@@ -85,7 +85,7 @@ module.exports = function(src, dest, options, callback) {
 		if (!options.dot) { filters.push(dotFilter); }
 		if (!options.junk) { filters.push(junkFilter); }
 		if (options.filter) {
-			var filter = getFilterFunction(options.filter);
+			var filter = getFilterFunction(options.filter, options.dot);
 			filters.push(filter);
 		}
 		return getFilterFunction(filters);
@@ -101,11 +101,11 @@ module.exports = function(src, dest, options, callback) {
 			return !junk.is(filename);
 		}
 
-		function getFilterFunction(filter) {
+		function getFilterFunction(filter, allowDotfiles) {
 			if (typeof filter === 'function') {
 				return filter;
 			} else if (typeof filter === 'string') {
-				return createGlobFilter(filter);
+				return createGlobFilter(filter, allowDotfiles);
 			} else if (filter instanceof RegExp) {
 				return createRegExpFilter(filter);
 			} else if (Array.isArray(filter)) {
@@ -115,9 +115,11 @@ module.exports = function(src, dest, options, callback) {
 			}
 
 
-			function createGlobFilter(glob) {
+			function createGlobFilter(glob, allowDotfiles) {
 				return function(path) {
-					return minimatch(path, glob);
+					return minimatch(path, glob, {
+						dot: allowDotfiles
+					});
 				};
 			}
 

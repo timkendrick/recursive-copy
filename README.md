@@ -59,7 +59,7 @@ var through = require('through2');
 
 var options = {
 	overwrite: true,
-	dotfiles: true,
+	dot: true,
 	junk: true,
 	filter: function(filePath) {
 		var filename = path.basename(filePath);
