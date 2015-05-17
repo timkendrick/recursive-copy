@@ -94,6 +94,23 @@ describe('copy()', function() {
 		});
 	}
 
+	function createSymbolicLink(src, dest, type) {
+		var stats;
+		try {
+			stats = fs.lstatSync(dest);
+		} catch (error) {
+			if (error.code !== 'ENOENT') {
+				throw error;
+			}
+		}
+		if (!stats) {
+			fs.symlinkSync(src, dest, type);
+		} else if (!stats.isSymbolicLink()) {
+			fs.unlinkSync(dest);
+			fs.symlinkSync(src, dest, type);
+		}
+	}
+
 	function listenTo(emitter, eventNames) {
 		var events = [];
 		eventNames.forEach(function(eventName) {
@@ -319,6 +336,7 @@ describe('copy()', function() {
 		});
 
 		it('should copy symlinks', function() {
+			createSymbolicLink('.', getSourcePath('symlink'), 'dir');
 			return copy(
 				getSourcePath('symlink'),
 				getDestinationPath('symlink')
@@ -331,6 +349,7 @@ describe('copy()', function() {
 		});
 
 		it('should return results for symlinks', function() {
+			createSymbolicLink('.', getSourcePath('symlink'), 'dir');
 			return copy(
 				getSourcePath('symlink'),
 				getDestinationPath('symlink')
@@ -340,6 +359,7 @@ describe('copy()', function() {
 		});
 
 		it('should copy nested symlinks', function() {
+			createSymbolicLink('.', getSourcePath('nested-symlink/symlink'), 'dir');
 			return copy(
 				getSourcePath('nested-symlink'),
 				getDestinationPath('nested-symlink')
@@ -352,6 +372,7 @@ describe('copy()', function() {
 		});
 
 		it('should return results for symlinks', function() {
+			createSymbolicLink('.', getSourcePath('nested-symlink/symlink'), 'dir');
 			return copy(
 				getSourcePath('nested-symlink'),
 				getDestinationPath('nested-symlink')
@@ -587,7 +608,7 @@ describe('copy()', function() {
 						'!1/**/*',
 						/^[^b].*$/,
 						function(filePath) {
-							return !/^2\/2-1\//.test(filePath);
+							return !/^2[\/\\]2-1[\/\\]/.test(filePath);
 						}
 					]
 				}
@@ -669,7 +690,7 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, '3').replace(/\/2/g, '/3');
+						return path.replace(/^2/, '3').replace(/[\/\\]2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -716,7 +737,7 @@ describe('copy()', function() {
 				getDestinationPath('parent'),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, '../3').replace(/\/2/g, '/3');
+						return path.replace(/^2/, '../3').replace(/[\/\\]2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -765,7 +786,7 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, 'child/3').replace(/\/2/g, '/3');
+						return path.replace(/^2/, 'child/3').replace(/[\/\\]2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -1348,6 +1369,7 @@ describe('copy()', function() {
 		});
 
 		it('should emit symlink copy error events', function() {
+			createSymbolicLink('.', getSourcePath('symlink'), 'dir');
 			var umockSymlink = mockSymlink(copy);
 
 			var copier = copy(
@@ -1426,6 +1448,7 @@ describe('copy()', function() {
 		});
 
 		it('should emit symlink copy events', function() {
+			createSymbolicLink('.', getSourcePath('symlink'), 'dir');
 			var copier = copy(
 				getSourcePath('symlink'),
 				getDestinationPath('symlink')
