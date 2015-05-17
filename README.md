@@ -142,7 +142,7 @@ Returns:
 
 ## Events
 
-The return value of the `copy` function also implements the `EventEmitter` interface, and emits the following events:
+The value returned by the `copy` function implements the `EventEmitter` interface, and emits the following events:
 
 | Event | Handler signature |
 | ----- | ----------------- |
