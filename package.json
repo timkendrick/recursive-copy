@@ -10,7 +10,7 @@
     "index.js"
   ],
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "eslint index.js test && mocha --reporter spec"
   },
   "repository": {
     "type": "git",
