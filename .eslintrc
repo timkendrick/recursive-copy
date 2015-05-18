@@ -1,0 +1,17 @@
+{
+	"rules": {
+		"quotes": [2, "single"],
+		"dot-notation": false,
+		"no-underscore-dangle": false,
+		"no-shadow": false,
+		"no-use-before-define": false,
+		"no-unused-vars": [2, {
+			"vars": "all",
+			"args": "none"
+		}],
+		"consistent-return": false
+	},
+	"env": {
+		"node": true
+	}
+}
