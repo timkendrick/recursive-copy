@@ -101,7 +101,7 @@ copy('src', 'dest', options)
 
 Recursively copy files and folders from `src` to `dest`
 
-Arguments:
+#### Arguments:
 
 | Name | Type | Required | Default | Description |
 | ---- | ---- | -------- | ------- | ----------- |
@@ -115,7 +115,8 @@ Arguments:
 | `options.transform` | `function` | No | `null` | Function that returns a transform stream used to modify file contents |
 | `callback` | `function` | No | `null` | Callback, invoked on success/failure |
 
-Returns:
+
+#### Returns:
 
 `Promise<Array>` Promise, fulfilled with array of copy results:
 
