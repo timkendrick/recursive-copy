@@ -11,7 +11,7 @@ var readDirFiles = require('read-dir-files');
 var through = require('through2');
 var rewire = require('rewire');
 
-var copy = rewire('../../index');
+var copy = rewire('../../lib/copy');
 
 var SOURCE_PATH = path.resolve(__dirname, '../fixtures/source');
 var DESTINATION_PATH = path.resolve(__dirname, '../fixtures/destination');

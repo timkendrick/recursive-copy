@@ -4,10 +4,12 @@
   "description": "Simple, flexible file copy utility",
   "main": "index.js",
   "directories": {
+    "lib": "lib",
     "test": "test"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "lib"
   ],
   "scripts": {
     "test": "eslint index.js test && mocha --reporter spec"
