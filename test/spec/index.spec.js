@@ -405,8 +405,52 @@ describe('copy()', function() {
 
 	describe('options', function() {
 
-		it('should overwrite destination path if overwrite is specified', function() {
-			fs.writeFileSync(getDestinationPath('file'), '');
+		it('should overwrite destination file if overwrite is specified', function() {
+			fs.writeFileSync(getDestinationPath('file'), 'Goodbye, world!');
+
+			return copy(
+				getSourcePath('file'),
+				getDestinationPath('file'),
+				{
+					overwrite: true
+				}
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							file: 'Hello, world!\n'
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should overwrite destination symlink if overwrite is specified', function() {
+			fs.symlinkSync('./symlink', getDestinationPath('file'), 'file');
+
+			return copy(
+				getSourcePath('file'),
+				getDestinationPath('file'),
+				{
+					overwrite: true
+				}
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							file: 'Hello, world!\n'
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should overwrite destination directory if overwrite is specified', function() {
+			fs.mkdirSync(getDestinationPath('file'));
 
 			return copy(
 				getSourcePath('file'),
