@@ -145,7 +145,7 @@ describe('copy()', function() {
 		}
 	}
 
-	function mockMkdirp(subject) {
+	function mockMkdirp(subject, errors) {
 		return subject.__set__('mkdirp', mkdirp);
 
 		function mkdirp(path, mode, callback) {
@@ -154,7 +154,11 @@ describe('copy()', function() {
 				mode = undefined;
 			}
 			setTimeout(function() {
-				callback(new Error('Test error'));
+				if (errors && errors[path]) {
+					callback(errors[path]);
+				} else {
+					callback(null);
+				}
 			});
 		}
 	}
@@ -202,6 +206,17 @@ describe('copy()', function() {
 			).then(function(results) {
 				checkResults(results, {
 					'file': 'file'
+				});
+			});
+		});
+
+		it('should create parent directory if it does not exist', function() {
+			return copy(
+				getSourcePath('nested-file/file'),
+				getDestinationPath('nested-file/file')
+			).then(function(results) {
+				checkResults(results, {
+					'nested-file/file': 'file'
 				});
 			});
 		});
@@ -1388,7 +1403,9 @@ describe('copy()', function() {
 		});
 
 		it('should emit directory copy error events', function() {
-			var unmockMkdirp = mockMkdirp(copy);
+			var errors = {};
+			errors[getDestinationPath('empty')] = new Error('Test error');
+			var unmockMkdirp = mockMkdirp(copy, errors);
 
 			var copier = copy(
 				getSourcePath('empty'),
