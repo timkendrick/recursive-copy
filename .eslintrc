@@ -9,7 +9,8 @@
 			"vars": "all",
 			"args": "none"
 		}],
-		"consistent-return": false
+		"consistent-return": false,
+		"no-console": 2
 	},
 	"env": {
 		"node": true
