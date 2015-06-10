@@ -42,7 +42,6 @@ describe('copy()', function() {
 			force: true
 		}, function(error) {
 			if (error) {
-				console.log('ERROR:', error);
 				done(error);
 			} else {
 				done();
