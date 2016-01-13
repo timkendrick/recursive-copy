@@ -62,10 +62,10 @@ var options = {
 	overwrite: true,
 	dot: true,
 	junk: true,
-	filter: function(filePath) {
-		var filename = path.basename(filePath);
-		return filename !== '.htpasswd';
-	},
+	filter: [
+		'**/*',
+		'!.htpasswd'
+	],
 	rename: function(filePath) {
 		return filePath + '.orig';
 	},
