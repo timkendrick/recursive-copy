@@ -111,7 +111,7 @@ Recursively copy files and folders from `src` to `dest`
 | `options.overwrite` | `boolean` | No | `false` | Whether to overwrite destination files |
 | `options.dot` | `boolean` | No | `false` | Whether to copy files beginning with a `.` |
 | `options.junk` | `boolean` | No | `false` | Whether to copy OS junk files (e.g. `.DS_Store`, `Thumbs.db`) |
-| `options.filter` | `function`, `RegExp`, `string`, `array` | No | `null` | Filter function / regular expression / glob that determines which files to copy |
+| `options.filter` | `function`, `RegExp`, `string`, `array` | No | `null` | Filter function / regular expression / glob that determines which files to copy (uses [maximatch](https://www.npmjs.com/package/maximatch)) |
 | `options.rename` | `function` | No | `null` | Function that maps source paths to destination paths |
 | `options.transform` | `function` | No | `null` | Function that returns a transform stream used to modify file contents |
 | `callback` | `function` | No | `null` | Callback, invoked on success/failure |

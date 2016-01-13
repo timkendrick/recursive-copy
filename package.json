@@ -45,9 +45,10 @@
     "extend": "^2.0.1",
     "graceful-fs": "^3.0.6",
     "junk": "^1.0.1",
-    "minimatch": "^2.0.7",
+    "maximatch": "^0.1.0",
     "mkdirp": "^0.5.1",
-    "promise": "^7.0.1"
+    "promise": "^7.0.1",
+    "slash": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^2.3.0",

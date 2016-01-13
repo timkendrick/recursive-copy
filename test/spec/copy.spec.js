@@ -646,7 +646,7 @@ describe('copy()', function() {
 				getSourcePath('directory'),
 				getDestinationPath(),
 				{
-					filter: '!1/**/*'
+					filter: '2/**/*'
 				}
 			).then(function(results) {
 				return getOutputFiles()
@@ -654,7 +654,6 @@ describe('copy()', function() {
 						var actual, expected;
 						actual = files;
 						expected = {
-							'1': {},
 							'2': {
 								'2-1': {
 									'2-1-a': '2-1-a\n',
@@ -666,9 +665,7 @@ describe('copy()', function() {
 								},
 								'2-a': '2-a\n',
 								'2-b': '2-b\n'
-							},
-							'a': 'a\n',
-							'b': 'b\n'
+							}
 						};
 						expect(actual).to.eql(expected);
 					});
@@ -681,10 +678,11 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					filter: [
-						'!1/**/*',
-						/^[^b].*$/,
+						'1/**/*',
+						'!1/1-1/**/*',
+						/^2\/(?!2-1\/).*$/,
 						function(filePath) {
-							return !/^2[\/\\]2-1[\/\\]/.test(filePath);
+							return filePath === 'a';
 						}
 					]
 				}
@@ -694,7 +692,15 @@ describe('copy()', function() {
 						var actual, expected;
 						actual = files;
 						expected = {
-							'1': {},
+							'1': {
+								'1-1': {},
+								'1-2': {
+									'1-2-a': '1-2-a\n',
+									'1-2-b': '1-2-b\n'
+								},
+								'1-a': '1-a\n',
+								'1-b': '1-b\n'
+							},
 							'2': {
 								'2-1': {
 								},
