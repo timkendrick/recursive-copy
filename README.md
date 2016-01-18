@@ -31,7 +31,7 @@ copy('src', 'dest', function(error, results) {
 	if (error) {
 		console.error('Copy failed: ' + error);
 	} else {
-		console.info('Copy succeeded');
+		console.info('Copied ' + results.length + ' files');
 	}
 });
 ```
@@ -43,7 +43,7 @@ var copy = require('recursive-copy');
 
 copy('src', 'dest')
 	.then(function(results) {
-		console.info('Copy succeeded');
+		console.info('Copied ' + results.length + ' files');
 	})
 	.catch(function(error) {
 		console.error('Copy failed: ' + error);
@@ -89,7 +89,7 @@ copy('src', 'dest', options)
 		console.error('Unable to copy ' + copyOperation.dest);
 	})
 	.then(function(results) {
-		console.info(copiedFiles.length + ' file(s) copied');
+		console.info(results.length + ' file(s) copied');
 	})
 	.catch(function(error) {
 		return console.error('Copy failed: ' + error);
