@@ -258,7 +258,42 @@ describe('copy()', function() {
 						var actual, expected;
 						actual = files;
 						expected = {
-							'directory': {
+							directory: {
+								a: 'a\n',
+								b: 'b\n',
+								c: 'c\n'
+							}
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should return results for directories', function() {
+			return copy(
+				getSourcePath('directory'),
+				getDestinationPath('directory')
+			).then(function(results) {
+				checkResults(results, {
+					'directory': 'dir',
+					'directory/a': 'file',
+					'directory/b': 'file',
+					'directory/c': 'file'
+				});
+			});
+		});
+
+		it('should copy nested directories', function() {
+			return copy(
+				getSourcePath('nested-directory'),
+				getDestinationPath('nested-directory')
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'nested-directory': {
 								'1': {
 									'1-1': {
 										'1-1-a': '1-1-a\n',
@@ -294,38 +329,38 @@ describe('copy()', function() {
 
 		it('should return results for directories', function() {
 			return copy(
-				getSourcePath('directory'),
-				getDestinationPath('directory')
+				getSourcePath('nested-directory'),
+				getDestinationPath('nested-directory')
 			).then(function(results) {
 				checkResults(results, {
-					'directory': 'dir',
-					'directory/1': 'dir',
-					'directory/1/1-1': 'dir',
-					'directory/1/1-1/1-1-a': 'file',
-					'directory/1/1-1/1-1-b': 'file',
-					'directory/1/1-2': 'dir',
-					'directory/1/1-2/1-2-a': 'file',
-					'directory/1/1-2/1-2-b': 'file',
-					'directory/1/1-a': 'file',
-					'directory/1/1-b': 'file',
-					'directory/2': 'dir',
-					'directory/2/2-1': 'dir',
-					'directory/2/2-1/2-1-a': 'file',
-					'directory/2/2-1/2-1-b': 'file',
-					'directory/2/2-2': 'dir',
-					'directory/2/2-2/2-2-a': 'file',
-					'directory/2/2-2/2-2-b': 'file',
-					'directory/2/2-a': 'file',
-					'directory/2/2-b': 'file',
-					'directory/a': 'file',
-					'directory/b': 'file'
+					'nested-directory': 'dir',
+					'nested-directory/1': 'dir',
+					'nested-directory/1/1-1': 'dir',
+					'nested-directory/1/1-1/1-1-a': 'file',
+					'nested-directory/1/1-1/1-1-b': 'file',
+					'nested-directory/1/1-2': 'dir',
+					'nested-directory/1/1-2/1-2-a': 'file',
+					'nested-directory/1/1-2/1-2-b': 'file',
+					'nested-directory/1/1-a': 'file',
+					'nested-directory/1/1-b': 'file',
+					'nested-directory/2': 'dir',
+					'nested-directory/2/2-1': 'dir',
+					'nested-directory/2/2-1/2-1-a': 'file',
+					'nested-directory/2/2-1/2-1-b': 'file',
+					'nested-directory/2/2-2': 'dir',
+					'nested-directory/2/2-2/2-2-a': 'file',
+					'nested-directory/2/2-2/2-2-b': 'file',
+					'nested-directory/2/2-a': 'file',
+					'nested-directory/2/2-b': 'file',
+					'nested-directory/a': 'file',
+					'nested-directory/b': 'file'
 				});
 			});
 		});
 
 		it('should merge directories into existing directories', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath()
 			).then(function(results) {
 				return getOutputFiles()
@@ -572,7 +607,7 @@ describe('copy()', function() {
 	describe('output transformation', function() {
 		it('should filter output files via function', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					filter: function(filePath) {
@@ -609,7 +644,7 @@ describe('copy()', function() {
 
 		it('should filter output files via regular expression', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					filter: /(^[^1].*$)|(^1$)/
@@ -643,7 +678,7 @@ describe('copy()', function() {
 
 		it('should filter output files via glob', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					filter: '2/**/*'
@@ -674,7 +709,7 @@ describe('copy()', function() {
 
 		it('should combine multiple filters from arrays', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					filter: [
@@ -720,7 +755,7 @@ describe('copy()', function() {
 
 		it('should rename files', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					rename: function(path) {
@@ -768,7 +803,7 @@ describe('copy()', function() {
 
 		it('should rename file paths', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					rename: function(path) {
@@ -815,7 +850,7 @@ describe('copy()', function() {
 
 		it('should rename files into parent paths', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath('parent'),
 				{
 					rename: function(path) {
@@ -864,7 +899,7 @@ describe('copy()', function() {
 
 		it('should rename files into child paths', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					rename: function(path) {
@@ -913,7 +948,7 @@ describe('copy()', function() {
 
 		it('should filter files before renaming', function() {
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath(),
 				{
 					filter: function(path) {
@@ -980,12 +1015,12 @@ describe('copy()', function() {
 
 		it('should throw the original error on nested file error', function() {
 			return copy(
-				getSourcePath('directory'),
-				getDestinationPath('directory'),
+				getSourcePath('nested-directory'),
+				getDestinationPath('nested-directory'),
 				{
 					transform: function(src, dest, stats) {
 						return through(function(chunk, enc, done) {
-							if (src === getSourcePath('directory/1/1-1/1-1-a')) {
+							if (src === getSourcePath('nested-directory/1/1-1/1-1-a')) {
 								done(new Error('Stream error'));
 							} else {
 								done(null, chunk);
@@ -1058,7 +1093,7 @@ describe('copy()', function() {
 
 			var actual, expected;
 			actual = copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath()
 			);
 			expected = 'EEXIST';
@@ -1069,7 +1104,7 @@ describe('copy()', function() {
 			fs.writeFileSync(getDestinationPath('pre-existing'), '');
 
 			return copy(
-				getSourcePath('directory'),
+				getSourcePath('nested-directory'),
 				getDestinationPath()
 			).then(function(results) {
 				return getOutputFiles()
