@@ -973,11 +973,13 @@ describe('copy()', function() {
 		});
 
 		it('should transform files', function() {
+			var transformArguments = null;
 			return copy(
 				getSourcePath('file'),
 				getDestinationPath('file'),
 				{
 					transform: function(src, dest, stats) {
+						transformArguments = arguments;
 						return through(function(chunk, enc, done) {
 							done(null, chunk.toString().toUpperCase());
 						});
@@ -992,6 +994,13 @@ describe('copy()', function() {
 							'file': 'HELLO, WORLD!\n'
 						};
 						expect(actual).to.eql(expected);
+						expect(transformArguments).to.exist;
+						expect(transformArguments.length).to.eql(3);
+						expect(transformArguments[0]).to.equal(getSourcePath('file'));
+						expect(transformArguments[1]).to.equal(getDestinationPath('file'));
+						expect(transformArguments[2]).to.exist;
+						expect(transformArguments[2].isFile).to.exist;
+						expect(transformArguments[2].isFile()).to.be.truthy;
 					});
 			});
 		});
