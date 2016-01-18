@@ -1005,6 +1005,35 @@ describe('copy()', function() {
 			});
 		});
 
+		it('should allow transform to be skipped', function() {
+			return copy(
+				getSourcePath('directory'),
+				getDestinationPath('directory'),
+				{
+					transform: function(src, dest, stats) {
+						if (path.basename(src) === 'b') { return null; }
+						return through(function(chunk, enc, done) {
+							done(null, chunk.toString().toUpperCase());
+						});
+					}
+				}
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'directory': {
+								'a': 'A\n',
+								'b': 'b\n',
+								'c': 'C\n'
+							}
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
 		it('should throw an error on a transform stream error', function() {
 			var actual, expected;
 			expected = 'Stream error';
