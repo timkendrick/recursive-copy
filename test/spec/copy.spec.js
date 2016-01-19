@@ -425,6 +425,30 @@ describe('copy()', function() {
 			});
 		});
 
+		it('should expand symlinks', function() {
+			createSymbolicLink('./file', getSourcePath('file-symlink'), 'file');
+			return copy(
+				getSourcePath('file-symlink'),
+				getDestinationPath('file-symlink'),
+				{
+					expand: true
+				}
+			).then(function(results) {
+				var actual = fs.lstatSync(getDestinationPath('file-symlink')).isSymbolicLink();
+				var expected = false;
+				expect(actual).to.equal(expected);
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'file-symlink': 'Hello, world!\n'
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
 		it('should copy nested symlinks', function() {
 			createSymbolicLink('.', getSourcePath('nested-symlink/symlink'), 'dir');
 			return copy(

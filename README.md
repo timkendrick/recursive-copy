@@ -60,6 +60,7 @@ var through = require('through2');
 
 var options = {
 	overwrite: true,
+	expand: true,
 	dot: true,
 	junk: true,
 	filter: [
@@ -110,6 +111,7 @@ Recursively copy files and folders from `src` to `dest`
 | `src` | `string` | Yes | N/A | Source file/folder path |
 | `dest` | `string` | Yes | N/A | Destination file/folder path |
 | `options.overwrite` | `boolean` | No | `false` | Whether to overwrite destination files |
+| `options.expand` | `boolean` | No | `false` | Whether to expand symbolic links |
 | `options.dot` | `boolean` | No | `false` | Whether to copy files beginning with a `.` |
 | `options.junk` | `boolean` | No | `false` | Whether to copy OS junk files (e.g. `.DS_Store`, `Thumbs.db`) |
 | `options.filter` | `function`, `RegExp`, `string`, `array` | No | `null` | Filter function / regular expression / glob that determines which files to copy (uses [maximatch](https://www.npmjs.com/package/maximatch)) |
