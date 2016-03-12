@@ -6,6 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
 var del = require('del');
+var slash = require('slash');
 var Promise = require('promise');
 var readDirFiles = require('read-dir-files');
 var through = require('through2');
@@ -425,52 +426,34 @@ describe('copy()', function() {
 			});
 		});
 
-		it('should expand symlinks', function() {
-			createSymbolicLink('./file', getSourcePath('file-symlink'), 'file');
-			return copy(
-				getSourcePath('file-symlink'),
-				getDestinationPath('file-symlink'),
-				{
-					expand: true
-				}
-			).then(function(results) {
-				var actual = fs.lstatSync(getDestinationPath('file-symlink')).isSymbolicLink();
-				var expected = false;
-				expect(actual).to.equal(expected);
-				return getOutputFiles()
-					.then(function(files) {
-						var actual, expected;
-						actual = files;
-						expected = {
-							'file-symlink': 'Hello, world!\n'
-						};
-						expect(actual).to.eql(expected);
-					});
-			});
-		});
-
 		it('should copy nested symlinks', function() {
-			createSymbolicLink('.', getSourcePath('nested-symlink/symlink'), 'dir');
+			createSymbolicLink('../file', getSourcePath('nested-symlinks/file'), 'file');
+			createSymbolicLink('../directory', getSourcePath('nested-symlinks/directory'), 'dir');
 			return copy(
-				getSourcePath('nested-symlink'),
-				getDestinationPath('nested-symlink')
+				getSourcePath('nested-symlinks'),
+				getDestinationPath('nested-symlinks')
 			).then(function(results) {
 				var actual, expected;
-				actual = fs.readlinkSync(getDestinationPath('nested-symlink/symlink'));
-				expected = '.';
+				actual = slash(fs.readlinkSync(getDestinationPath('nested-symlinks/file')));
+				expected = '../file';
+				expect(actual).to.equal(expected);
+				actual = slash(fs.readlinkSync(getDestinationPath('nested-symlinks/directory')));
+				expected = '../directory';
 				expect(actual).to.equal(expected);
 			});
 		});
 
-		it('should return results for symlinks', function() {
-			createSymbolicLink('.', getSourcePath('nested-symlink/symlink'), 'dir');
+		it('should return results for nested symlinks', function() {
+			createSymbolicLink('../file', getSourcePath('nested-symlinks/file'), 'file');
+			createSymbolicLink('../directory', getSourcePath('nested-symlinks/directory'), 'dir');
 			return copy(
-				getSourcePath('nested-symlink'),
-				getDestinationPath('nested-symlink')
+				getSourcePath('nested-symlinks'),
+				getDestinationPath('nested-symlinks')
 			).then(function(results) {
 				checkResults(results, {
-					'nested-symlink': 'dir',
-					'nested-symlink/symlink': 'symlink'
+					'nested-symlinks': 'dir',
+					'nested-symlinks/file': 'symlink',
+					'nested-symlinks/directory': 'symlink'
 				});
 			});
 		});
@@ -626,6 +609,90 @@ describe('copy()', function() {
 			});
 		});
 
+		it('should expand symlinked source files if expand is specified', function() {
+			createSymbolicLink('./file', getSourcePath('file-symlink'), 'file');
+			return copy(
+				getSourcePath('file-symlink'),
+				getDestinationPath('expanded-file-symlink'),
+				{
+					expand: true
+				}
+			).then(function(results) {
+				var actual = fs.lstatSync(getDestinationPath('expanded-file-symlink')).isSymbolicLink();
+				var expected = false;
+				expect(actual).to.equal(expected);
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'expanded-file-symlink': 'Hello, world!\n'
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should expand symlinked source directories if expand is specified', function() {
+			createSymbolicLink('./directory', getSourcePath('directory-symlink'), 'dir');
+			return copy(
+				getSourcePath('directory-symlink'),
+				getDestinationPath('directory-symlink'),
+				{
+					expand: true
+				}
+			).then(function(results) {
+				var actual = fs.lstatSync(getDestinationPath('directory-symlink')).isSymbolicLink();
+				var expected = false;
+				expect(actual).to.equal(expected);
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'directory-symlink': {
+								'a': 'a\n',
+								'b': 'b\n',
+								'c': 'c\n'
+							}
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should expand nested symlinks if expand is specified', function() {
+			createSymbolicLink('../file', getSourcePath('nested-symlinks/file'), 'file');
+			createSymbolicLink('../directory', getSourcePath('nested-symlinks/directory'), 'dir');
+			return copy(
+				getSourcePath('nested-symlinks'),
+				getDestinationPath('expanded-nested-symlinks'),
+				{
+					expand: true
+				}
+			).then(function(results) {
+				var actual, expected;
+				actual = fs.lstatSync(getDestinationPath('expanded-nested-symlinks')).isSymbolicLink();
+				expected = false;
+				expect(actual).to.equal(expected);
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							'expanded-nested-symlinks': {
+								'file': 'Hello, world!\n',
+								'directory': {
+									'a': 'a\n',
+									'b': 'b\n',
+									'c': 'c\n'
+								}
+							}
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
 	});
 
 	describe('output transformation', function() {
