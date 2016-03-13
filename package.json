@@ -24,6 +24,7 @@
     "file",
     "directory",
     "folder",
+    "symlink",
     "fs",
     "rename",
     "filter",
