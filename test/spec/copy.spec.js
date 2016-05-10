@@ -1,5 +1,10 @@
 'use strict';
 
+var Promise = global.Promise || require('promise');
+if (typeof Promise.prototype.finally === 'undefined') {
+	require('promise.prototype.finally');
+}
+
 var fs = require('fs');
 var path = require('path');
 var chai = require('chai');
@@ -7,7 +12,6 @@ var expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
 var del = require('del');
 var slash = require('slash');
-var Promise = require('promise');
 var readDirFiles = require('read-dir-files');
 var through = require('through2');
 var rewire = require('rewire');
@@ -37,16 +41,10 @@ describe('copy()', function() {
 		});
 	});
 
-	afterEach(function(done) {
-		del(DESTINATION_PATH, {
+	afterEach(function() {
+		return del(DESTINATION_PATH, {
 			dot: true,
 			force: true
-		}, function(error) {
-			if (error) {
-				done(error);
-			} else {
-				done();
-			}
 		});
 	});
 
