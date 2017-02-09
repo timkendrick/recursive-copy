@@ -599,7 +599,7 @@ describe('copy()', function() {
 						expected = {
 							'a': 'a\n',
 							'b': 'b\n',
-							'Icon': 'Icon\n',
+							'npm-debug.log': 'npm-debug.log\n',
 							'Thumbs.db': 'Thumbs.db\n'
 						};
 						expect(actual).to.eql(expected);
