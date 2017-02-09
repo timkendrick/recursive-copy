@@ -1,9 +1,6 @@
 'use strict';
 
 var Promise = global.Promise || require('promise');
-if (typeof Promise.prototype.finally === 'undefined') {
-	require('promise.prototype.finally');
-}
 
 var fs = require('fs');
 var path = require('path');
@@ -1644,14 +1641,17 @@ describe('copy()', function() {
 				expected = 'function';
 				expect(actual).to.be.a(expected);
 			})
-			.finally(function() {
+			.then(function() {
+				unmockMkdirp();
+			})
+			.catch(function() {
 				unmockMkdirp();
 			});
 		});
 
 		it('should emit symlink copy error events', function() {
 			createSymbolicLink('.', getSourcePath('symlink'), 'dir');
-			var umockSymlink = mockSymlink(copy);
+			var unmockSymlink = mockSymlink(copy);
 
 			var copier = copy(
 				getSourcePath('symlink'),
@@ -1723,8 +1723,12 @@ describe('copy()', function() {
 				expected = 'function';
 				expect(actual).to.be.a(expected);
 			})
-			.finally(function() {
-				umockSymlink();
+			.then(function() {
+				unmockSymlink();
+			})
+			.catch(function(error) {
+				unmockSymlink();
+				throw error;
 			});
 		});
 
