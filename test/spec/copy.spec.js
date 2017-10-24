@@ -205,6 +205,17 @@ describe('copy()', function() {
 			});
 		});
 
+		it('should retain file permissions', function() {
+			return copy(
+				getSourcePath('executable'),
+				getDestinationPath('executable')
+			).then(function(results) {
+				var actual = fs.statSync(getDestinationPath('executable')).mode;
+				var expected = fs.statSync(getSourcePath('executable')).mode;
+				expect(actual).to.equal(expected);
+			});
+		});
+
 		it('should create parent directory if it does not exist', function() {
 			return copy(
 				getSourcePath('nested-file/file'),
