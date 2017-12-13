@@ -1,6 +1,6 @@
 {
   "name": "recursive-copy",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Simple, flexible file copy utility",
   "main": "index.js",
   "directories": {
