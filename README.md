@@ -117,6 +117,9 @@ Recursively copy files and folders from `src` to `dest`
 | `options.filter` | `function`, `RegExp`, `string`, `array` | No | `null` | Filter function / regular expression / glob that determines which files to copy (uses [maximatch](https://www.npmjs.com/package/maximatch)) |
 | `options.rename` | `function` | No | `null` | Function that maps source paths to destination paths |
 | `options.transform` | `function` | No | `null` | Function that returns a transform stream used to modify file contents |
+| `options.results` | `boolean` | No | `true` | Whether to return an array of copy results |
+| `options.concurrency` | `number` | No | `255` | Maximum number of simultaneous copy operations |
+| `options.debug` | `boolean` | No | `false` | Whether to log debug information |
 | `callback` | `function` | No | `null` | Callback, invoked on success/failure |
 
 
