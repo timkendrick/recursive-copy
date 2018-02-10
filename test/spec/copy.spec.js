@@ -435,6 +435,7 @@ describe('copy()', function() {
 		it('should copy nested symlinks', function() {
 			createSymbolicLink('../file', getSourcePath('nested-symlinks/file'), 'file');
 			createSymbolicLink('../directory', getSourcePath('nested-symlinks/directory'), 'dir');
+			createSymbolicLink('../../directory', getSourcePath('nested-symlinks/nested/directory'), 'dir');
 			return copy(
 				getSourcePath('nested-symlinks'),
 				getDestinationPath('nested-symlinks')
@@ -446,12 +447,16 @@ describe('copy()', function() {
 				actual = slash(fs.readlinkSync(getDestinationPath('nested-symlinks/directory')));
 				expected = '../directory';
 				expect(actual).to.equal(expected);
+				actual = slash(fs.readlinkSync(getDestinationPath('nested-symlinks/nested/directory')));
+				expected = '../../directory';
+				expect(actual).to.equal(expected);
 			});
 		});
 
 		it('should return results for nested symlinks', function() {
 			createSymbolicLink('../file', getSourcePath('nested-symlinks/file'), 'file');
 			createSymbolicLink('../directory', getSourcePath('nested-symlinks/directory'), 'dir');
+			createSymbolicLink('../../directory', getSourcePath('nested-symlinks/nested/directory'), 'dir');
 			return copy(
 				getSourcePath('nested-symlinks'),
 				getDestinationPath('nested-symlinks')
@@ -459,7 +464,9 @@ describe('copy()', function() {
 				checkResults(results, {
 					'nested-symlinks': 'dir',
 					'nested-symlinks/file': 'symlink',
-					'nested-symlinks/directory': 'symlink'
+					'nested-symlinks/directory': 'symlink',
+					'nested-symlinks/nested': 'dir',
+					'nested-symlinks/nested/directory': 'symlink'
 				});
 			});
 		});
@@ -670,6 +677,7 @@ describe('copy()', function() {
 		it('should expand nested symlinks if expand is specified', function() {
 			createSymbolicLink('../file', getSourcePath('nested-symlinks/file'), 'file');
 			createSymbolicLink('../directory', getSourcePath('nested-symlinks/directory'), 'dir');
+			createSymbolicLink('../../directory', getSourcePath('nested-symlinks/nested/directory'), 'dir');
 			return copy(
 				getSourcePath('nested-symlinks'),
 				getDestinationPath('expanded-nested-symlinks'),
@@ -692,6 +700,13 @@ describe('copy()', function() {
 									'a': 'a\n',
 									'b': 'b\n',
 									'c': 'c\n'
+								},
+								'nested': {
+									'directory': {
+										'a': 'a\n',
+										'b': 'b\n',
+										'c': 'c\n'
+									}
 								}
 							}
 						};
