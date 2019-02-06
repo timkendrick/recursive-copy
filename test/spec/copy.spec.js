@@ -205,6 +205,23 @@ describe('copy()', function() {
 			});
 		});
 
+		it('should retain file modification dates', function() {
+			return new Promise(function(resolve) {
+				setTimeout(resolve, 1000)
+			}).then(function() {
+				return copy(
+					getSourcePath('file'),
+					getDestinationPath('file')
+				);
+			}).then(function(results) {
+				var actual = fs.statSync(getDestinationPath('file')).mtime;
+				var expected = fs.statSync(getSourcePath('file')).mtime;
+				actual.setMilliseconds(0);
+				expected.setMilliseconds(0);
+				expect(actual).to.eql(expected);
+			});
+		});
+
 		it('should retain file permissions', function() {
 			return copy(
 				getSourcePath('executable'),
