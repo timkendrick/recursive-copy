@@ -73,7 +73,7 @@ describe('copy()', function() {
 		}, {});
 		expected = Object.keys(expectedResults).map(function(filename) {
 			return {
-				src: getSourcePath(path.join(filename)),
+				src: getSourcePath(filename),
 				dest: getDestinationPath(filename)
 			};
 		}).reduce(function(paths, copyOperation) {
