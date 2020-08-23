@@ -3,16 +3,19 @@
   "version": "2.0.10",
   "description": "Simple, flexible file copy utility",
   "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "test"
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "lib"
   ],
   "scripts": {
-    "test": "eslint index.js test && mocha --reporter spec"
+    "test": "eslint index.js test && mocha --reporter spec && tsd",
+    "prepublishOnly": "test"
   },
   "repository": {
     "type": "git",
@@ -52,12 +55,14 @@
     "slash": "^1.0.0"
   },
   "devDependencies": {
+    "@types/node": "^14.6.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
     "eslint": "^2.9.0",
     "mocha": "^2.4.5",
     "read-dir-files": "^0.1.1",
     "rewire": "^2.3.3",
-    "through2": "^2.0.1"
+    "through2": "^2.0.1",
+    "tsd": "^0.13.1"
   }
 }

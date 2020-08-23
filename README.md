@@ -50,6 +50,17 @@ copy('src', 'dest')
 	});
 ```
 
+#### TypeScript usage
+
+```typescript
+import copy from 'recursive-copy';
+
+try {
+	await copy('src', 'dest');
+} catch (e) {
+}
+```
+
 #### Advanced options
 
 ```javascript
