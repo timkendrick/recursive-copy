@@ -17,7 +17,7 @@
     "test": "eslint index.js test && mocha --reporter spec && if-node-version '>=8' npm run test-tsd && if-node-version '<8' npm run test-tsd-old",
     "test-tsd": "tsd && echo 'TypeScript definitions are valid'",
     "test-tsd-old": "echo 'Cannot test TypeScript definitions because Node version is too old'",
-    "prepublishOnly": "test"
+    "prepublishOnly": "npm run test"
   },
   "repository": {
     "type": "git",
