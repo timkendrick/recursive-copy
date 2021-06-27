@@ -14,9 +14,10 @@
     "lib"
   ],
   "scripts": {
-    "test": "eslint index.js test && mocha --reporter spec && if-node-version '>=8' npm run test-tsd && if-node-version '<8' npm run test-tsd-old",
-    "test-tsd": "tsd && echo 'TypeScript definitions are valid'",
-    "test-tsd-old": "echo 'Cannot test TypeScript definitions because Node version is too old'",
+    "test": "npm run test:lint && npm run test:mocha && if-node-version '>=10' npm run test:typings",
+    "test:lint": "eslint index.js test",
+    "test:mocha": "mocha --reporter spec",
+    "test:typings": "tsd && echo 'TypeScript definitions are valid'",
     "prepublishOnly": "npm run test"
   },
   "repository": {

@@ -1,21 +1,29 @@
 init:
   - git config --global core.autocrlf input
 
+image:
+  - Visual Studio 2019
+  - Ubuntu
+  - macOS
 environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
   matrix:
     - nodejs_version: "0.10"
     - nodejs_version: "0.12"
-    - nodejs_version: "3"
     - nodejs_version: "4"
     - nodejs_version: "5"
     - nodejs_version: "6"
     - nodejs_version: "8"
     - nodejs_version: "10"
+    - nodejs_version: "12"
+    - nodejs_version: "14"
+    - nodejs_version: "16"
 
 build: off
 
 install:
   - ps: Install-Product node $env:nodejs_version
+  - sh: nvm install $nodejs_version
   - npm install
 
 test_script:
