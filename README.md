@@ -50,14 +50,16 @@ copy('src', 'dest')
 	});
 ```
 
-#### TypeScript usage
+#### ES2015+ usage
 
-```typescript
+```javascript
 import copy from 'recursive-copy';
 
 try {
-	await copy('src', 'dest');
-} catch (e) {
+	const results = await copy('src', 'dest');
+	console.info('Copied ' + results.length + ' files');
+} catch (error) {
+	console.error('Copy failed: ' + error);
 }
 ```
 
