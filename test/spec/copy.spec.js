@@ -491,7 +491,7 @@ describe('copy()', function() {
 
 	describe('options', function() {
 
-		it('should overwrite destination file if overwrite is specified', function() {
+		it('should overwrite destination file with source file if overwrite is specified', function() {
 			fs.writeFileSync(getDestinationPath('file'), 'Goodbye, world!');
 
 			return copy(
@@ -507,6 +507,32 @@ describe('copy()', function() {
 						actual = files;
 						expected = {
 							file: 'Hello, world!\n'
+						};
+						expect(actual).to.eql(expected);
+					});
+			});
+		});
+
+		it('should overwrite destination file with source directory if overwrite is specified', function() {
+			fs.writeFileSync(getDestinationPath('directory'), '');
+
+			return copy(
+				getSourcePath('directory'),
+				getDestinationPath('directory'),
+				{
+					overwrite: true
+				}
+			).then(function(results) {
+				return getOutputFiles()
+					.then(function(files) {
+						var actual, expected;
+						actual = files;
+						expected = {
+							directory: {
+								a: 'a\n',
+								b: 'b\n',
+								c: 'c\n'
+							}
 						};
 						expect(actual).to.eql(expected);
 					});
@@ -535,7 +561,7 @@ describe('copy()', function() {
 			});
 		});
 
-		it('should overwrite destination directory if overwrite is specified', function() {
+		it('should overwrite destination directory with source file if overwrite is specified', function() {
 			fs.mkdirSync(getDestinationPath('file'));
 
 			return copy(
