@@ -1411,10 +1411,22 @@ describe('copy()', function() {
 				getSourcePath('file'),
 				getDestinationPath('file')
 			);
-			var actual, expected;
-			actual = copier.on('complete', function() {});
-			expected = copier;
-			expect(actual).to.equal(expected);
+			expect(function() {
+					copier
+						.on('error', function() {})
+						.on('complete', function() {})
+						.on('createDirectoryStart', function() {})
+						.on('createDirectoryError', function() {})
+						.on('createDirectoryComplete', function() {})
+						.on('createSymlinkStart', function() {})
+						.on('createSymlinkError', function() {})
+						.on('createSymlinkComplete', function() {})
+						.on('copyFileStart', function() {})
+						.on('copyFileError', function() {})
+						.on('copyFileComplete', function() {})
+						.then(function() { })
+						.catch(function() { });
+			}).to.not.throw();
 			return copier;
 		});
 

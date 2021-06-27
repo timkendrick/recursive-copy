@@ -46,7 +46,6 @@
   "homepage": "https://github.com/timkendrick/recursive-copy",
   "dependencies": {
     "del": "^2.2.0",
-    "emitter-mixin": "0.0.3",
     "errno": "^0.1.2",
     "graceful-fs": "^4.1.4",
     "junk": "^1.0.1",
