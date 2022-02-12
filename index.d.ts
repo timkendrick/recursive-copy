@@ -29,7 +29,7 @@ interface Options {
 	/**
 	 * Function that returns a transform stream used to modify file contents.
 	 */
-	transform?: (src: string, dest: string, stats: Stats) => Stream;
+	transform?: (src: string, dest: string, stats: Stats) => Stream | null | undefined;
 	/**
 	 * Whether to return an array of copy results.
 	 *
