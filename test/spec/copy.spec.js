@@ -7,7 +7,7 @@ var path = require('path');
 var chai = require('chai');
 var expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
-var del = require('del');
+var rimraf = require('rimraf');
 var slash = require('slash');
 var readDirFiles = require('read-dir-files');
 var through = require('through2');
@@ -28,21 +28,15 @@ describe('copy()', function() {
 	beforeEach(function(done) {
 		fs.mkdir(DESTINATION_PATH, function(error) {
 			if (error) {
-				del(path.join(DESTINATION_PATH, '**/*'), {
-					dot: true,
-					force: true
-				}, done);
+				rimraf(path.join(DESTINATION_PATH, '**/*'), done);
 			} else {
 				done();
 			}
 		});
 	});
 
-	afterEach(function() {
-		return del(DESTINATION_PATH, {
-			dot: true,
-			force: true
-		});
+	afterEach(function(done) {
+		return rimraf(DESTINATION_PATH, done);
 	});
 
 	function getSourcePath(filename) {

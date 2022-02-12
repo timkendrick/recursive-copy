@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "test": "npm run test:lint && npm run test:mocha && if-node-version '>=10' npm run test:typings",
-    "test:lint": "eslint index.js test",
+    "test:lint": "if-node-version '>=4' eslint index.js test",
     "test:mocha": "mocha --reporter spec",
     "test:typings": "tsd && echo 'TypeScript definitions are valid'",
     "prepublishOnly": "npm run test"
@@ -60,7 +60,6 @@
     "@types/node": "^14.6.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "del": "^2.2.0",
     "eslint": "^2.9.0",
     "if-node-version": "^1.1.1",
     "mocha": "^2.4.5",
