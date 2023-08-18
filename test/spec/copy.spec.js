@@ -930,7 +930,7 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, '3').replace(/[\/\\]2/g, '/3');
+						return path.replace(/^2/, '3').replace(/\/2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -977,7 +977,7 @@ describe('copy()', function() {
 				getDestinationPath('parent'),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, '../3').replace(/[\/\\]2/g, '/3');
+						return path.replace(/^2/, '../3').replace(/\/2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -1026,7 +1026,7 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, 'child/3').replace(/[\/\\]2/g, '/3');
+						return path.replace(/^2/, 'child/3').replace(/\/2/g, '/3');
 					}
 				}
 			).then(function(results) {
