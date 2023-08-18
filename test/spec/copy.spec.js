@@ -7,7 +7,6 @@ var path = require('path');
 var chai = require('chai');
 var expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
-var rimraf = require('rimraf');
 var slash = require('slash');
 var readDirFiles = require('read-dir-files');
 var through = require('through2');
@@ -15,6 +14,7 @@ var rewire = require('rewire');
 
 var copy = rewire('../../lib/copy');
 
+var rimraf = (path, cb) => fs.rm(path, { recursive: true, force: true }, cb);
 var SOURCE_PATH = path.resolve(__dirname, '../fixtures/source');
 var DESTINATION_PATH = path.resolve(__dirname, '../fixtures/destination');
 
