@@ -7,7 +7,6 @@ var path = require('path');
 var chai = require('chai');
 var expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
-var rimraf = require('rimraf');
 var slash = require('slash');
 var readDirFiles = require('read-dir-files');
 var through = require('through2');
@@ -15,6 +14,7 @@ var rewire = require('rewire');
 
 var copy = rewire('../../lib/copy');
 
+var rimraf = (path, cb) => fs.rm(path, { recursive: true, force: true }, cb);
 var SOURCE_PATH = path.resolve(__dirname, '../fixtures/source');
 var DESTINATION_PATH = path.resolve(__dirname, '../fixtures/destination');
 
@@ -930,7 +930,7 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, '3').replace(/[\/\\]2/g, '/3');
+						return path.replace(/^2/, '3').replace(/\/2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -977,7 +977,7 @@ describe('copy()', function() {
 				getDestinationPath('parent'),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, '../3').replace(/[\/\\]2/g, '/3');
+						return path.replace(/^2/, '../3').replace(/\/2/g, '/3');
 					}
 				}
 			).then(function(results) {
@@ -1026,7 +1026,7 @@ describe('copy()', function() {
 				getDestinationPath(),
 				{
 					rename: function(path) {
-						return path.replace(/^2/, 'child/3').replace(/[\/\\]2/g, '/3');
+						return path.replace(/^2/, 'child/3').replace(/\/2/g, '/3');
 					}
 				}
 			).then(function(results) {

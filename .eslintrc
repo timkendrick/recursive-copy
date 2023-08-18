@@ -3,6 +3,9 @@
 	"extends": [
 		"eslint:recommended"
 	],
+	"parserOptions": {
+		"ecmaVersion": 2017,
+	},
 	"rules": {
 		"quotes": ["error", "single"],
 		"dot-notation": "off",
