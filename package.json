@@ -47,7 +47,6 @@
   "homepage": "https://github.com/timkendrick/recursive-copy",
   "dependencies": {
     "errno": "^0.1.2",
-    "graceful-fs": "^4.1.4",
     "junk": "^1.0.1",
     "maximatch": "^0.1.0",
     "mkdirp": "^0.5.1",

@@ -10,7 +10,6 @@
       "license": "ISC",
       "dependencies": {
         "errno": "^0.1.2",
-        "graceful-fs": "^4.1.4",
         "junk": "^1.0.1",
         "maximatch": "^0.1.0",
         "mkdirp": "^0.5.1",
@@ -1577,7 +1576,8 @@
     "node_modules/graceful-fs": {
       "version": "4.2.4",
       "resolved": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.4.tgz",
-      "integrity": "sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw=="
+      "integrity": "sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw==",
+      "dev": true
     },
     "node_modules/growl": {
       "version": "1.9.2",
