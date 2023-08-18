@@ -12,7 +12,6 @@
         "errno": "^0.1.2",
         "junk": "^1.0.1",
         "maximatch": "^0.1.0",
-        "mkdirp": "^0.5.1",
         "pify": "^2.3.0",
         "rimraf": "^2.7.1",
         "slash": "^1.0.0"
@@ -2242,7 +2241,8 @@
     "node_modules/minimist": {
       "version": "1.2.5",
       "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.5.tgz",
-      "integrity": "sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw=="
+      "integrity": "sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==",
+      "dev": true
     },
     "node_modules/minimist-options": {
       "version": "4.1.0",
@@ -2256,17 +2256,6 @@
       },
       "engines": {
         "node": ">= 6"
-      }
-    },
-    "node_modules/mkdirp": {
-      "version": "0.5.5",
-      "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.5.tgz",
-      "integrity": "sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==",
-      "dependencies": {
-        "minimist": "^1.2.5"
-      },
-      "bin": {
-        "mkdirp": "bin/cmd.js"
       }
     },
     "node_modules/mocha": {
