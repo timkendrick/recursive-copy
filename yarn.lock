@@ -414,15 +414,6 @@ core-util-is@~1.0.0:
   resolved "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
-cross-spawn@^5.0.1:
-  version "5.1.0"
-  resolved "https://registry.npmjs.org/cross-spawn/-/cross-spawn-5.1.0.tgz"
-  integrity sha1-6L0O/uWPz/b4+UUQoKVUu/ojVEk=
-  dependencies:
-    lru-cache "^4.0.1"
-    shebang-command "^1.2.0"
-    which "^1.2.9"
-
 cross-spawn@^7.0.2:
   version "7.0.3"
   resolved "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.3.tgz"
@@ -912,14 +903,6 @@ http-cache-semantics@^4.0.0:
   resolved "https://registry.npmjs.org/http-cache-semantics/-/http-cache-semantics-4.1.0.tgz"
   integrity sha512-carPklcUh7ROWRK7Cv27RPtdhYhUsela/ue5/jKzjegVvXDqM2ILE9Q2BGn9JZJh1g87cp56su/FgQSzcWS8cQ==
 
-if-node-version@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/if-node-version/-/if-node-version-1.1.1.tgz"
-  integrity sha512-qMcJD7ftbSWlf+6w8nzZAWKOELmG3xH5Gu5XYW2+f9uaYj1t9JX5KNWxnvNMGhu8f+uIUgnqFHLlwyKTHaLWWA==
-  dependencies:
-    cross-spawn "^5.0.1"
-    semver "^5.2.0"
-
 ignore@^5.1.4, ignore@^5.2.0:
   version "5.2.4"
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.2.4.tgz"
@@ -1170,14 +1153,6 @@ lowercase-keys@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/lowercase-keys/-/lowercase-keys-2.0.0.tgz"
   integrity sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==
-
-lru-cache@^4.0.1:
-  version "4.1.5"
-  resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-4.1.5.tgz"
-  integrity sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==
-  dependencies:
-    pseudomap "^1.0.2"
-    yallist "^2.1.2"
 
 lru-cache@2:
   version "2.7.3"
@@ -1496,11 +1471,6 @@ prr@~1.0.1:
   resolved "https://registry.npmjs.org/prr/-/prr-1.0.1.tgz"
   integrity sha1-0/wRS6BplaRexok/SEzrHXj19HY=
 
-pseudomap@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.npmjs.org/pseudomap/-/pseudomap-1.0.2.tgz"
-  integrity sha1-8FKijacOYYkX7wqKw0wa5aaChrM=
-
 pump@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/pump/-/pump-3.0.0.tgz"
@@ -1665,11 +1635,6 @@ semver-diff@^3.1.1:
   dependencies:
     semver "^6.3.0"
 
-semver@^5.2.0:
-  version "5.7.2"
-  resolved "https://registry.npmjs.org/semver/-/semver-5.7.2.tgz"
-  integrity sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==
-
 semver@^6.0.0, semver@^6.2.0, semver@^6.3.0:
   version "6.3.0"
   resolved "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz"
@@ -1680,24 +1645,12 @@ semver@^6.0.0, semver@^6.2.0, semver@^6.3.0:
   resolved "https://registry.npmjs.org/semver/-/semver-5.7.1.tgz"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
 
-shebang-command@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.npmjs.org/shebang-command/-/shebang-command-1.2.0.tgz"
-  integrity sha1-RKrGW2lbAzmJaMOfNj/uXer98eo=
-  dependencies:
-    shebang-regex "^1.0.0"
-
 shebang-command@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz"
   integrity sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==
   dependencies:
     shebang-regex "^3.0.0"
-
-shebang-regex@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/shebang-regex/-/shebang-regex-1.0.0.tgz"
-  integrity sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
 
 shebang-regex@^3.0.0:
   version "3.0.0"
@@ -1987,13 +1940,6 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-which@^1.2.9:
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/which/-/which-1.3.1.tgz"
-  integrity sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==
-  dependencies:
-    isexe "^2.0.0"
-
 which@^2.0.1:
   version "2.0.2"
   resolved "https://registry.npmjs.org/which/-/which-2.0.2.tgz"
@@ -2032,11 +1978,6 @@ xtend@~4.0.1:
   version "4.0.2"
   resolved "https://registry.npmjs.org/xtend/-/xtend-4.0.2.tgz"
   integrity sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==
-
-yallist@^2.1.2:
-  version "2.1.2"
-  resolved "https://registry.npmjs.org/yallist/-/yallist-2.1.2.tgz"
-  integrity sha1-HBH5IY8HYImkfdUS+TxmmaaoHVI=
 
 yargs-parser@^18.1.3:
   version "18.1.3"
