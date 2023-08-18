@@ -52,7 +52,6 @@
     "errno": "^0.1.2",
     "junk": "^1.0.1",
     "maximatch": "^0.1.0",
-    "pify": "^2.3.0",
     "slash": "^1.0.0"
   },
   "devDependencies": {
